@@ -1,0 +1,294 @@
+[
+  {
+    "scenario": "baseline",
+    "variant": "fastify-native",
+    "config": {
+      "durationSeconds": 10,
+      "connections": 100,
+      "pipelining": 1,
+      "warmupSeconds": 3
+    },
+    "idle": {
+      "readyNs": 183382566.06666666,
+      "memory": {
+        "rss": 106551569.06666666,
+        "heapUsed": 14633416,
+        "heapTotal": 50655232,
+        "external": 2656064,
+        "heapLimit": 4496293888
+      },
+      "resourceUsage": {
+        "userCPU": 337394,
+        "systemCPU": 28032,
+        "maxRSS": 103848
+      },
+      "variant": "fastify-native:baseline",
+      "count": {
+        "domains": 200,
+        "servicesPerDomain": 5,
+        "totalServices": 1000
+      },
+      "pid": 9638
+    },
+    "perf": {
+      "requests": {
+        "average": 53078.50133333333,
+        "mean": 65354.19,
+        "stddev": 2725.21,
+        "min": 57082,
+        "max": 67282,
+        "total": 718904,
+        "p0_001": 57087,
+        "p0_01": 57087,
+        "p0_1": 57087,
+        "p1": 57087,
+        "p2_5": 57087,
+        "p10": 64607,
+        "p25": 65279,
+        "p50": 66303,
+        "p75": 66687,
+        "p90": 67135,
+        "p97_5": 67327,
+        "p99": 67327,
+        "p99_9": 67327,
+        "p99_99": 67327,
+        "p99_999": 67327,
+        "sent": 719004
+      },
+      "latency": {
+        "average": 1.04,
+        "mean": 1.04,
+        "stddev": 0.8,
+        "min": 1,
+        "max": 125,
+        "p0_001": 0,
+        "p0_01": 0,
+        "p0_1": 0,
+        "p1": 1,
+        "p2_5": 1,
+        "p10": 1,
+        "p25": 1,
+        "p50": 1,
+        "p75": 1,
+        "p90": 1,
+        "p97_5": 2,
+        "p99": 2.2333333333333334,
+        "p99_9": 3,
+        "p99_99": 25,
+        "p99_999": 111,
+        "totalCount": 718904
+      },
+      "throughput": {
+        "average": 10616026.458666665,
+        "mean": 13071080.73,
+        "stddev": 544948.05,
+        "min": 11416400,
+        "max": 13456400,
+        "total": 143780800,
+        "p0_001": 11419647,
+        "p0_01": 11419647,
+        "p0_1": 11419647,
+        "p1": 11419647,
+        "p2_5": 11419647,
+        "p10": 12918783,
+        "p25": 13058047,
+        "p50": 13254655,
+        "p75": 13336575,
+        "p90": 13426687,
+        "p97_5": 13459455,
+        "p99": 13459455,
+        "p99_9": 13459455,
+        "p99_99": 13459455,
+        "p99_999": 13459455
+      },
+      "errors": 0,
+      "non2xx": 0,
+      "timeouts": 0
+    },
+    "after": {
+      "readyNs": 11218595325,
+      "memory": {
+        "rss": 125511953.06666666,
+        "heapUsed": 15554416,
+        "heapTotal": 51965952,
+        "external": 2656104,
+        "heapLimit": 4496293888
+      },
+      "resourceUsage": {
+        "userCPU": 8317138,
+        "systemCPU": 3312118,
+        "maxRSS": 122980
+      },
+      "variant": "fastify-native:baseline",
+      "count": {
+        "domains": 200,
+        "servicesPerDomain": 5,
+        "totalServices": 1000
+      },
+      "pid": 9638
+    },
+    "counters": {
+      "errors": 0,
+      "non2xx": 0,
+      "timeouts": 0
+    },
+    "stats": {
+      "n": 30,
+      "requestsAvgStddev": 3555.464709942274,
+      "throughputAvgStddev": 711083.7383878097,
+      "latencyP99Stddev": 0.4955356249106167,
+      "idleReadyNsStddev": 3877506.934754907,
+      "rssIdleStddev": 994836.6302795962,
+      "rssAfterStddev": 2580189.9442768022,
+      "errorsTotal": 0,
+      "non2xxTotal": 0,
+      "timeoutsTotal": 0
+    }
+  },
+  {
+    "scenario": "baseline",
+    "variant": "stratify",
+    "config": {
+      "durationSeconds": 10,
+      "connections": 100,
+      "pipelining": 1,
+      "warmupSeconds": 3
+    },
+    "idle": {
+      "readyNs": 129161854.43333334,
+      "memory": {
+        "rss": 101313058.13333334,
+        "heapUsed": 14321528,
+        "heapTotal": 33353728,
+        "external": 2656064,
+        "heapLimit": 4496293888
+      },
+      "resourceUsage": {
+        "userCPU": 323730,
+        "systemCPU": 26058,
+        "maxRSS": 99212
+      },
+      "variant": "fastify-di:baseline",
+      "count": {
+        "domains": 200,
+        "servicesPerDomain": 5,
+        "totalServices": 1000
+      },
+      "pid": 9708
+    },
+    "perf": {
+      "requests": {
+        "average": 53149.968333333345,
+        "mean": 66258.91,
+        "stddev": 2907.96,
+        "min": 57309,
+        "max": 68293,
+        "total": 728918,
+        "p0_001": 57311,
+        "p0_01": 57311,
+        "p0_1": 57311,
+        "p1": 57311,
+        "p2_5": 57311,
+        "p10": 66175,
+        "p25": 66559,
+        "p50": 67071,
+        "p75": 67455,
+        "p90": 68223,
+        "p97_5": 68351,
+        "p99": 68351,
+        "p99_9": 68351,
+        "p99_99": 68351,
+        "p99_999": 68351,
+        "sent": 729018
+      },
+      "latency": {
+        "average": 1.03,
+        "mean": 1.03,
+        "stddev": 1.01,
+        "min": 1,
+        "max": 158,
+        "p0_001": 0,
+        "p0_01": 0,
+        "p0_1": 0,
+        "p1": 1,
+        "p2_5": 1,
+        "p10": 1,
+        "p25": 1,
+        "p50": 1,
+        "p75": 1,
+        "p90": 1,
+        "p97_5": 1,
+        "p99": 2.2333333333333334,
+        "p99_9": 3,
+        "p99_99": 14,
+        "p99_999": 145,
+        "totalCount": 728918
+      },
+      "throughput": {
+        "average": 10629964.029000001,
+        "mean": 13254283.64,
+        "stddev": 580769.83,
+        "min": 11461800,
+        "max": 13658600,
+        "total": 145783600,
+        "p0_001": 11468799,
+        "p0_01": 11468799,
+        "p0_1": 11468799,
+        "p1": 11468799,
+        "p2_5": 11468799,
+        "p10": 13230079,
+        "p25": 13303807,
+        "p50": 13418495,
+        "p75": 13492223,
+        "p90": 13647871,
+        "p97_5": 13664255,
+        "p99": 13664255,
+        "p99_9": 13664255,
+        "p99_99": 13664255,
+        "p99_999": 13664255
+      },
+      "errors": 0,
+      "non2xx": 0,
+      "timeouts": 0
+    },
+    "after": {
+      "readyNs": 11169228586,
+      "memory": {
+        "rss": 124077533.86666666,
+        "heapUsed": 15273216,
+        "heapTotal": 51703808,
+        "external": 2656104,
+        "heapLimit": 4496293888
+      },
+      "resourceUsage": {
+        "userCPU": 8322511,
+        "systemCPU": 3292554,
+        "maxRSS": 123532
+      },
+      "variant": "fastify-di:baseline",
+      "count": {
+        "domains": 200,
+        "servicesPerDomain": 5,
+        "totalServices": 1000
+      },
+      "pid": 9708
+    },
+    "counters": {
+      "errors": 0,
+      "non2xx": 0,
+      "timeouts": 0
+    },
+    "stats": {
+      "n": 30,
+      "requestsAvgStddev": 3373.1824126009788,
+      "throughputAvgStddev": 675181.092411277,
+      "latencyP99Stddev": 0.4229525846816506,
+      "idleReadyNsStddev": 49316101.10012202,
+      "rssIdleStddev": 1315415.3694852877,
+      "rssAfterStddev": 2158719.3280431144,
+      "errorsTotal": 0,
+      "non2xxTotal": 0,
+      "timeoutsTotal": 0
+    }
+  }
+]
