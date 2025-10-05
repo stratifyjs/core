@@ -1,6 +1,6 @@
 import { describe, test, TestContext } from "node:test";
 import { createProvider } from "./providers";
-import { createModule } from "../modules/module";
+import { createModule } from "../modules";
 import { createApp } from "..";
 
 describe("createProvider", () => {

@@ -1,67 +1,11 @@
-import type { FastifyInstance } from "fastify";
 import { Container } from "../container/container";
 import { deepClone } from "../utils/deep-clone";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type BivariantCallback<T extends (...args: any) => any> = {
-  bivarianceHack: T;
-}["bivarianceHack"];
-
-export type ProviderLifecycle = "singleton" | "transient";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ProviderAny = ProviderDef<any, any>;
-
-export type BaseProviderDepsMap = Record<string, ProviderAny>;
-export type DepValues<ProviderDepsMap extends BaseProviderDepsMap> = {
-  [K in keyof ProviderDepsMap]: Awaited<
-    ReturnType<ProviderDepsMap[K]["expose"]>
-  >;
-};
-
-type ProviderHook<D extends BaseProviderDepsMap, V> = BivariantCallback<
-  (ctx: {
-    fastify: FastifyInstance;
-    deps: DepValues<D>;
-    value: V;
-  }) => unknown | Promise<unknown>
->;
-
-type ProviderErrorHook<D extends BaseProviderDepsMap, V> = BivariantCallback<
-  (ctx: {
-    fastify: FastifyInstance;
-    deps: DepValues<D>;
-    value: V;
-    error: unknown;
-  }) => unknown | Promise<unknown>
->;
-
-export interface ProviderDef<
-  ProviderDepsMap extends BaseProviderDepsMap = BaseProviderDepsMap,
-  Value = unknown,
-> {
-  name: string;
-  lifecycle: ProviderLifecycle;
-  deps: ProviderDepsMap;
-  onReady?: ProviderHook<ProviderDepsMap, Value>;
-  onClose?: ProviderHook<ProviderDepsMap, Value>;
-  onError?: ProviderErrorHook<ProviderDepsMap, Value>;
-  expose: (deps: DepValues<ProviderDepsMap>) => Value | Promise<Value>;
-  resolve: () => Promise<Value>;
-
-  withProviders(
-    updater: (existingDeps: ProviderDepsMap) => ProviderDepsMap,
-  ): ProviderDef<ProviderDepsMap, Value>;
-
-  _prov?: never;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ProviderContract<Value> = ProviderDef<any, Value>;
-
-export type InferProviderContract<P> =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  P extends ProviderDef<any, infer Value> ? ProviderContract<Value> : never;
+import {
+  BaseProviderDepsMap,
+  ProviderAny,
+  ProviderDef,
+  ProviderOptions,
+} from "./providers.types";
 
 const kProviderId = Symbol("fastify-di:providerId");
 let __seq = 0;
@@ -77,15 +21,9 @@ export function getProviderId(provider: ProviderAny): string {
 export function createProvider<
   const ProviderDepsMap extends BaseProviderDepsMap,
   Value,
->(def: {
-  name: string;
-  lifecycle?: ProviderLifecycle;
-  deps?: ProviderDepsMap;
-  expose: (deps: DepValues<ProviderDepsMap>) => Value | Promise<Value>;
-  onReady?: ProviderHook<ProviderDepsMap, Value>;
-  onClose?: ProviderHook<ProviderDepsMap, Value>;
-  onError?: ProviderErrorHook<ProviderDepsMap, Value>;
-}): ProviderDef<ProviderDepsMap, Value> {
+>(
+  def: ProviderOptions<ProviderDepsMap, Value>,
+): ProviderDef<ProviderDepsMap, Value> {
   if (def.lifecycle === "transient") {
     if (def.onReady) {
       throwTransientHookedError("onReady", def.name);
@@ -105,9 +43,7 @@ export function createProvider<
     onReady: def.onReady,
     onClose: def.onClose,
     resolve: async () => new Container().get(self),
-    withProviders(
-      updater: (existingDeps: ProviderDepsMap) => ProviderDepsMap,
-    ): ProviderDef<ProviderDepsMap, Value> {
+    withProviders(updater: (existingDeps: ProviderDepsMap) => ProviderDepsMap) {
       return createProvider<ProviderDepsMap, Value>({
         name: self.name,
         lifecycle: self.lifecycle,
@@ -148,4 +84,3 @@ and do not share hooks across instances.
 Use a singleton provider if you need lifecycle management.`,
   );
 }
-

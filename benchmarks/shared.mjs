@@ -1,7 +1,7 @@
 import v8 from "node:v8";
 
 // eslint-disable-next-line no-undef
-const proc = process
+const proc = process;
 
 export const PORT = 3210;
 
@@ -59,7 +59,7 @@ export function attachMetricsRoute(fastify, { startNs, variantLabel, counts }) {
 
     const mem = proc.memoryUsage();
     const heap = v8.getHeapStatistics();
-    const ru = proc.resourceUsage()
+    const ru = proc.resourceUsage();
     const readyNs = Number(proc.hrtime.bigint() - startNs);
 
     return {

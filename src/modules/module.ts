@@ -1,39 +1,14 @@
 import type { FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
-import type { ProviderAny } from "../providers/providers";
 import type { Container } from "../container/container";
 import { deepClone } from "../utils/deep-clone";
-
-export type ProviderValues<
-  Providers extends Readonly<Record<string, ProviderAny>>,
-> = {
-  [K in keyof Providers]: Awaited<ReturnType<Providers[K]["expose"]>>;
-};
-
-export interface ModuleDef<
-  Providers extends Readonly<Record<string, ProviderAny>> = Readonly<
-    Record<string, ProviderAny>
-  >,
-  SubModules extends ReadonlyArray<ModuleAny> = ReadonlyArray<ModuleAny>,
-> {
-  name: string;
-  deps: Providers;
-  subModules: SubModules;
-  encapsulate: boolean;
-  accessFastify?: (ctx: {
-    fastify: FastifyInstance;
-    deps: {
-      [K in keyof Providers]: Awaited<ReturnType<Providers[K]["expose"]>>;
-    };
-  }) => unknown | Promise<unknown>;
-  withProviders(
-    updater: (deps: Providers) => Providers,
-  ): ModuleDef<Providers, SubModules>;
-  _mod?: never;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ModuleAny = ModuleDef<any, any>;
+import {
+  ModuleAny,
+  ModuleDef,
+  ModuleOptions,
+  ProvidersMap,
+  SubModulesMap,
+} from "./module.types";
 
 const kModuleId = Symbol("fastify-dependency-injection:moduleId");
 let __seq = 0;
@@ -47,20 +22,9 @@ export function getModuleId(mod: ModuleAny): string {
 }
 
 export function createModule<
-  const Providers extends Readonly<Record<string, ProviderAny>>,
-  const SubModules extends ReadonlyArray<ModuleAny>,
->(def: {
-  name: string;
-  deps?: Providers;
-  subModules?: SubModules;
-  encapsulate?: boolean;
-  accessFastify?: (ctx: {
-    fastify: FastifyInstance;
-    deps: {
-      [K in keyof Providers]: Awaited<ReturnType<Providers[K]["expose"]>>;
-    };
-  }) => unknown | Promise<unknown>;
-}): ModuleDef<Providers, SubModules> {
+  const Providers extends ProvidersMap,
+  const SubModules extends SubModulesMap,
+>(def: ModuleOptions<Providers, SubModules>): ModuleDef<Providers, SubModules> {
   const self = {
     name: def.name,
     deps: (def.deps ?? {}) as Providers,
@@ -76,7 +40,7 @@ export function createModule<
         subModules: deepClone(self.subModules),
         encapsulate: self.encapsulate,
         accessFastify: self.accessFastify,
-      })
+      });
     },
   };
 
@@ -112,10 +76,7 @@ export async function registerModule(
   );
 }
 
-async function resolveProviderMap(
-  container: Container,
-  map: Readonly<Record<string, ProviderAny>>,
-) {
+async function resolveProviderMap(container: Container, map: ProvidersMap) {
   const out: Record<string, unknown> = {};
   for (const [k, p] of Object.entries(map)) {
     out[k] = await container.get(p); // return always a new instance if transiant

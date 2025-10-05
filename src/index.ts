@@ -3,22 +3,14 @@ import Fastify, {
   type FastifyServerOptions,
 } from "fastify";
 
-export * from "./providers/providers";
-export * from "./modules/module";
+export * from "./providers";
+export * from "./modules";
 export * from "./container/container";
 
-import {
-  getModuleId,
-  registerModule,
-  type ModuleAny,
-} from "./modules/module";
-import {
-  getProviderId,
-  resolveDeps,
-  type ProviderAny,
-} from "./providers/providers";
+import { getProviderId, resolveDeps, type ProviderAny } from "./providers";
 import { Container } from "./container/container";
 import { describeTree } from "./printer/describe-tree";
+import { getModuleId, ModuleAny, registerModule } from "./modules";
 
 export interface CreateAppOptions {
   serverOptions?: FastifyServerOptions;

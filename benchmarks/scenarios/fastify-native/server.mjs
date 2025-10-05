@@ -53,4 +53,4 @@ forEachDomain((i) => app.register(createHttpPlugin(i)));
 
 app.register(createMetricsPlugin());
 
-await listen(app)
+await listen(app);

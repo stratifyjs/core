@@ -267,7 +267,7 @@ async function run() {
     warmupSeconds: WARMUP_SECONDS,
     nbDomains: NUMBER_OF_DOMAINS,
     nbServicesPerDomain: SERVICES_PER_DOMAIN,
-    repeats: REPEATS
+    repeats: REPEATS,
   });
 
   const mdPath = join(outDir, `bench-${stamp}.md`);

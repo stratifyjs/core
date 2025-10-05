@@ -1,5 +1,5 @@
-import { getModuleId, type ModuleAny } from "../modules/module";
-import { getProviderId, type ProviderAny } from "../providers/providers";
+import { getModuleId, type ModuleAny } from "../modules";
+import { getProviderId, type ProviderAny } from "../providers";
 
 const useColor = () => process.stdout.isTTY;
 const wrap = (code: number, s: string, enabled: boolean) => {
@@ -47,7 +47,7 @@ export function describeTree(root: ModuleAny): string {
     for (const p of Object.values(m.deps) as ProviderAny[]) {
       walkProvider(p, depth + 1);
     }
-    
+
     for (const s of m.subModules) {
       walk(s, depth + 1);
     }

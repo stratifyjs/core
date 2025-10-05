@@ -25,8 +25,6 @@ const repo = createProvider({
   expose: ({ db }) => db.url,
 });
 
-
-
 const repoDouble = repo.withProviders((deps) => ({
   ...deps,
   db, // reuse db, or swap with another DbContract
@@ -90,5 +88,9 @@ expectType<
   >
 >(usersModuleDouble);
 
-
-expectError(usersModule.withProviders((providers) => ({ ...providers, repo: 123 })));
+expectError(
+  usersModule.withProviders((providers) => ({
+    ...providers,
+    repo: 123,
+  })),
+);

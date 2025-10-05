@@ -3,7 +3,7 @@ import type {
   ProviderAny,
   ProviderDef,
   BaseProviderDepsMap,
-} from "../providers/providers";
+} from "../providers";
 
 export class Container {
   private singletons = new WeakMap<object, Promise<unknown>>();

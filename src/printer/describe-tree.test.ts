@@ -1,5 +1,5 @@
 import { describe, test, TestContext } from "node:test";
-import { createProvider } from "../providers/providers";
+import { createProvider } from "../providers";
 import { createApp, createModule } from "..";
 
 describe("describeTree", () => {

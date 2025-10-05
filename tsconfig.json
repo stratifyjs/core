@@ -9,5 +9,5 @@
     "resolveJsonModule": true,
     "types": ["node"]
   },
-  "include": ["src", "tests", "src/providers/providers.test.ts"]
+  "include": ["src", "tests"]
 }
