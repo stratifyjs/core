@@ -30,7 +30,7 @@ export interface ModuleDef<
   subModules: SubModules;
   encapsulate: boolean;
   accessFastify?: AccessFastifyCallback<Providers>;
-  routes?: routesCallback<Providers>
+  routes?: routesCallback<Providers>;
   withProviders(
     updater: (deps: Providers) => Providers,
   ): ModuleDef<Providers, SubModules>;
@@ -46,5 +46,5 @@ export type ModuleOptions<
   subModules?: SubModules;
   encapsulate?: boolean;
   accessFastify?: AccessFastifyCallback<Providers>;
-  routes?: routesCallback<Providers>
+  routes?: routesCallback<Providers>;
 };

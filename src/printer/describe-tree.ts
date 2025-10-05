@@ -21,7 +21,8 @@ export function describeTree(root: ModuleAny): string {
   function walkProvider(p: ProviderAny, depth: number) {
     const pad = "  ".repeat(depth);
     const life = p.lifecycle;
-    const lifeCol = life === "transient" ? colors.yellow(life) : colors.green(life);
+    const lifeCol =
+      life === "transient" ? colors.yellow(life) : colors.green(life);
 
     lines.push(
       `${pad}🔧 ${colors.dim("prov")} ` +

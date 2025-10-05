@@ -295,7 +295,7 @@ describe("module integration", () => {
     test("registers route defined through the builder", async (t: TestContext) => {
       t.plan(2);
 
-      const exposed = { find: () => "Jean" }
+      const exposed = { find: () => "Jean" };
 
       const userRepo = createProvider({
         name: "userRepo",

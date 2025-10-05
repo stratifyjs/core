@@ -1,5 +1,8 @@
 import { RouteOptions } from "fastify";
-import { ensureAsyncCallback, ensureAsyncCallbacks } from "../../utils/ensure-async-callback";
+import {
+  ensureAsyncCallback,
+  ensureAsyncCallbacks,
+} from "../../utils/ensure-async-callback";
 
 export class RoutesBuilder {
   private readonly routes = new Set<RouteOptions>();
@@ -22,7 +25,6 @@ export class RoutesBuilder {
     return this;
   }
 
-  
   getRoutes(): RouteOptions[] {
     return [...this.routes];
   }

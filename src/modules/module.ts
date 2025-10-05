@@ -64,10 +64,10 @@ export async function registerModule(
     }
 
     if (mod.routes) {
-      const builder = new RoutesBuilder()
+      const builder = new RoutesBuilder();
       await mod.routes({ builder, deps: localValues });
       for (const route of builder.getRoutes()) {
-        instance.route(route)
+        instance.route(route);
       }
     }
 
