@@ -8,8 +8,6 @@ export class RoutesBuilder {
   private readonly routes = new Set<RouteOptions>();
 
   addRoute(opts: RouteOptions) {
-    this.routes.add(opts);
-
     ensureAsyncCallbacks(`${opts.url} onRequest`, opts.onRequest);
     ensureAsyncCallbacks(`${opts.url} preParsing`, opts.preParsing);
     ensureAsyncCallbacks(`${opts.url} preValidation`, opts.preValidation);
@@ -21,6 +19,8 @@ export class RoutesBuilder {
     ensureAsyncCallbacks(`${opts.url} onError`, opts.onError);
 
     ensureAsyncCallback(`${opts.url} handler`, opts.handler);
+
+    this.routes.add(opts);
 
     return this;
   }
