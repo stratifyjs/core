@@ -1,8 +1,16 @@
 import type { FastifyInstance } from "fastify";
 import type { ProviderAny } from "../providers";
+import { RoutesBuilder } from "./routes/routes-builder";
 
 export type AccessFastifyCallback<Providers extends ProvidersMap> = (ctx: {
   fastify: FastifyInstance;
+  deps: {
+    [K in keyof Providers]: Awaited<ReturnType<Providers[K]["expose"]>>;
+  };
+}) => unknown | Promise<unknown>;
+
+export type routesCallback<Providers extends ProvidersMap> = (ctx: {
+  builder: RoutesBuilder;
   deps: {
     [K in keyof Providers]: Awaited<ReturnType<Providers[K]["expose"]>>;
   };
@@ -22,6 +30,7 @@ export interface ModuleDef<
   subModules: SubModules;
   encapsulate: boolean;
   accessFastify?: AccessFastifyCallback<Providers>;
+  routes?: routesCallback<Providers>
   withProviders(
     updater: (deps: Providers) => Providers,
   ): ModuleDef<Providers, SubModules>;
@@ -37,4 +46,5 @@ export type ModuleOptions<
   subModules?: SubModules;
   encapsulate?: boolean;
   accessFastify?: AccessFastifyCallback<Providers>;
+  routes?: routesCallback<Providers>
 };
