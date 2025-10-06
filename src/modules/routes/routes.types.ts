@@ -1,7 +1,6 @@
 import {
   FastifyReply,
   FastifyRequest,
-  onRequestAbortHookHandler,
   RouteOptions,
 } from "fastify";
 import {
@@ -10,6 +9,7 @@ import {
   OnPreParsingHandler,
   OnPreSerializationHandler,
   OnPreValidationHandler,
+  OnRequestAbortHandler,
   OnRequestHandler,
   OnResponseHandler,
   OnSendHookHandler,
@@ -46,6 +46,7 @@ export type BaseStratifyRouteOptions = Omit<
 export interface StratifyRouteOptions extends BaseStratifyRouteOptions {
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | "HEAD";
   url: string;
+  errorHandler?: ErrorHandler
   handler: RouteHandler;
   onRequest?: OnRequestHandler | OnRequestHandler[];
   preParsing?: OnPreParsingHandler | OnPreParsingHandler[];
@@ -56,6 +57,5 @@ export interface StratifyRouteOptions extends BaseStratifyRouteOptions {
   onResponse?: OnResponseHandler | OnResponseHandler[];
   onTimeout?: OnTimeoutHandler | OnTimeoutHandler[];
   onError?: OnErrorHookHandler | OnErrorHookHandler[];
-  onRequestAbort?: onRequestAbortHookHandler | onRequestAbortHookHandler[];
-  errorHandler?: ErrorHandler
+  onRequestAbort?: OnRequestAbortHandler | OnRequestAbortHandler[];
 }

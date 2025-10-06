@@ -1,4 +1,4 @@
-import { RouteOptions } from "fastify";
+import { FastifyInstance } from "fastify";
 import {
   ensureAsyncCallback,
   ensureAsyncCallbacks,
@@ -26,7 +26,13 @@ export class RoutesBuilder {
     return this;
   }
 
-  getRoutes(): RouteOptions[] {
+  getRoutes(): StratifyRouteOptions[] {
     return [...this.routes];
+  }
+
+  register(instance: FastifyInstance) {
+    for (const route of this.getRoutes()) {
+      instance.route(route);
+    }
   }
 }

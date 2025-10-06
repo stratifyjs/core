@@ -19,4 +19,29 @@ export type OnResponseHandler = (request: FastifyRequest, reply: FastifyReply) =
 
 export type OnTimeoutHandler = (request: FastifyRequest, reply: FastifyReply) => Promise<void>
 
-export type OnRequestAbort = (request: FastifyRequest) => Promise<void>
+export type OnRequestAbortHandler = (request: FastifyRequest) => Promise<void>
+
+export type HttpHookName =
+  | "onRequest"
+  | "preParsing"
+  | "preValidation"
+  | "preHandler"
+  | "preSerialization"
+  | "onSend"
+  | "onResponse"
+  | "onTimeout"
+  | "onError"
+  | "onRequestAbort";
+
+export interface HttpHookMap {
+  onRequest: OnRequestHandler[];
+  preParsing: OnPreParsingHandler[];
+  preValidation: OnPreValidationHandler[];
+  preHandler: OnPreHandlerHandler[];
+  preSerialization: OnPreSerializationHandler[];
+  onSend: OnSendHookHandler[];
+  onResponse: OnResponseHandler[];
+  onTimeout: OnTimeoutHandler[];
+  onError: OnErrorHookHandler[];
+  onRequestAbort: OnRequestAbortHandler[];
+}

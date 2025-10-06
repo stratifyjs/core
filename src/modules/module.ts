@@ -10,6 +10,7 @@ import {
   SubModulesMap,
 } from "./module.types";
 import { RoutesBuilder } from "./routes/routes-builder";
+import { HttpHooksBuilder } from "../hooks/hooks-builder";
 
 const kModuleId = Symbol("fastify-dependency-injection:moduleId");
 let __seq = 0;
@@ -33,6 +34,7 @@ export function createModule<
     encapsulate: def.encapsulate ?? true,
     accessFastify: def.accessFastify,
     routes: def.routes,
+    httpHooks: def.httpHooks,
     withProviders(
       updater: (deps: Providers) => Providers,
     ): ModuleDef<Providers, SubModules> {
@@ -66,9 +68,13 @@ export async function registerModule(
     if (mod.routes) {
       const builder = new RoutesBuilder();
       await mod.routes({ builder, deps: localValues });
-      for (const route of builder.getRoutes()) {
-        instance.route(route);
-      }
+      builder.register(instance)
+    }
+
+    if (mod.httpHooks) {
+      const builder = new HttpHooksBuilder(mod.name);
+      await mod.httpHooks({ builder, deps: localValues });
+      builder.register(instance)
     }
 
     for (const sub of mod.subModules) {
