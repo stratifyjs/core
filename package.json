@@ -16,6 +16,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -24,7 +27,9 @@
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "lint:fix": "npm run lint -- --fix && npm run format",
     "format": "prettier -w .",
-    "benchmark": "npm run build && node benchmarks/run.mjs"
+    "benchmark": "npm run build && node benchmarks/run.mjs",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run build && npm run test"
   },
   "keywords": [],
   "author": "jean.antoine.michelet@gmail.com",
@@ -45,10 +50,20 @@
     "typescript-eslint": "^8.44.0"
   },
   "dependencies": {
-    "fastify": "^5.6.0",
     "fastify-plugin": "^5.0.1"
+  },
+  "peerDependencies": {
+    "fastify": "^5.0.0"
   },
   "tsd": {
     "directory": "src"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stratifyjs/core.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stratifyjs/core/issues"
+  },
+  "homepage": "https://github.com/stratifyjs/core#readme"
 }
