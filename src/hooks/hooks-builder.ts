@@ -1,6 +1,4 @@
-import {
-  FastifyInstance,
-} from "fastify";
+import { FastifyInstance } from "fastify";
 import { HttpHookMap, HttpHookName } from "./hooks.types";
 import { ensureAsyncCallback } from "../utils/ensure-async-callback";
 
@@ -18,13 +16,16 @@ export class HttpHooksBuilder {
     onRequestAbort: [],
   };
 
-  constructor (private readonly moduleName: string) {}
+  constructor(private readonly moduleName: string) {}
 
   addHook<T extends HttpHookName>(
     name: T,
     handler: HttpHookMap[T][number],
   ): this {
-    ensureAsyncCallback(`Hook "${name}" in module "${this.moduleName}"`, handler);
+    ensureAsyncCallback(
+      `Hook "${name}" in module "${this.moduleName}"`,
+      handler,
+    );
     this.hooks[name].push(handler as never);
     return this;
   }
@@ -38,6 +39,6 @@ export class HttpHooksBuilder {
   }
 
   getHooks(): HttpHookMap {
-    return this.hooks
+    return this.hooks;
   }
 }

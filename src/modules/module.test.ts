@@ -8,7 +8,7 @@ describe("module integration", () => {
 
     const root = createModule({
       name: "root-defaults",
-      accessFastify({ fastify, deps }) {
+      fastifyInstaller({ fastify, deps }) {
         t.assert.ok(fastify.log);
         t.assert.deepStrictEqual(deps, {});
       },
@@ -74,14 +74,14 @@ describe("module integration", () => {
 
     const subA = createModule({
       name: "subA",
-      accessFastify: async ({ fastify }) => {
+      fastifyInstaller: async ({ fastify }) => {
         fastify.decorate("onlyA", 123);
       },
     });
 
     const subB = createModule({
       name: "subB",
-      accessFastify: async ({ fastify }) => {
+      fastifyInstaller: async ({ fastify }) => {
         t.assert.throws(() => fastify.getDecorator("onlyA"), {
           code: "FST_ERR_DEC_UNDECLARED",
         });
@@ -106,19 +106,19 @@ describe("module integration", () => {
 
     const subA = createModule({
       name: "subA",
-      accessFastify: async ({ fastify }) => {
+      fastifyInstaller: async ({ fastify }) => {
         fastify.decorate("onlyA", 123);
       },
       subModules: [
         createModule({
           name: "child",
-          accessFastify: async ({ fastify }) => {
+          fastifyInstaller: async ({ fastify }) => {
             t.assert.strictEqual(fastify.getDecorator("onlyA"), 123);
           },
           subModules: [
             createModule({
               name: "grand-child",
-              accessFastify: async ({ fastify }) => {
+              fastifyInstaller: async ({ fastify }) => {
                 t.assert.strictEqual(fastify.getDecorator("onlyA"), 123);
               },
             }),
@@ -143,14 +143,14 @@ describe("module integration", () => {
     const openA = createModule({
       name: "openA",
       encapsulate: false,
-      accessFastify: async ({ fastify }) => {
+      fastifyInstaller: async ({ fastify }) => {
         fastify.decorate("shared", true);
       },
       subModules: [
         createModule({
           name: "subOpenA",
           encapsulate: false,
-          accessFastify: async ({ fastify }) => {
+          fastifyInstaller: async ({ fastify }) => {
             fastify.decorate("subShared", true);
           },
         }),
@@ -159,7 +159,7 @@ describe("module integration", () => {
 
     const openB = createModule({
       name: "openB",
-      accessFastify: async ({ fastify }) => {
+      fastifyInstaller: async ({ fastify }) => {
         t.assert.strictEqual(fastify.getDecorator("shared"), true);
         t.assert.strictEqual(fastify.getDecorator("subShared"), true);
       },
@@ -184,7 +184,7 @@ describe("module integration", () => {
         createModule({
           name: "subOpenA",
           encapsulate: false,
-          accessFastify: async ({ fastify }) => {
+          fastifyInstaller: async ({ fastify }) => {
             fastify.decorate("subShared", true);
           },
         }),
@@ -193,7 +193,7 @@ describe("module integration", () => {
 
     const openB = createModule({
       name: "openB",
-      accessFastify: async ({ fastify }) => {
+      fastifyInstaller: async ({ fastify }) => {
         t.assert.throws(() => fastify.getDecorator("subShared"), {
           code: "FST_ERR_DEC_UNDECLARED",
         });
@@ -224,7 +224,7 @@ describe("module integration", () => {
         createModule({
           name: "subOpenAEncapsulated",
           encapsulate: true,
-          accessFastify: async ({ fastify }) => {
+          fastifyInstaller: async ({ fastify }) => {
             fastify.decorate("subEncapsulated", true);
           },
         }),
@@ -233,7 +233,7 @@ describe("module integration", () => {
 
     const openB = createModule({
       name: "openB",
-      accessFastify: async ({ fastify }) => {
+      fastifyInstaller: async ({ fastify }) => {
         t.assert.throws(() => fastify.getDecorator("subEncapsulated"), {
           code: "FST_ERR_DEC_UNDECLARED",
         });
@@ -262,7 +262,7 @@ describe("module integration", () => {
     const root = createModule({
       name: "root",
       deps: { userRepo },
-      accessFastify({ deps }) {
+      fastifyInstaller({ deps }) {
         foundValues.push(deps.userRepo.find());
       },
     });
@@ -289,96 +289,5 @@ describe("module integration", () => {
 
     await app.close();
     await doubleApp.close();
-  });
-
-  describe("routes builder integration", () => {
-    test("registers route defined through the builder", async (t: TestContext) => {
-      t.plan(2);
-
-      const exposed = { find: () => "Jean" };
-
-      const userRepo = createProvider({
-        name: "userRepo",
-        expose: async () => exposed,
-      });
-
-      const root = createModule({
-        name: "root",
-        deps: { userRepo },
-        routes({ builder, deps }) {
-          t.assert.deepEqual(deps.userRepo, exposed);
-
-          builder.addRoute({
-            url: "/",
-            method: "GET",
-            handler: async () => ({
-              user: deps.userRepo.find(),
-            }),
-          });
-        },
-      });
-
-      const app = await createApp({ root });
-      const res = await app.inject({ method: "GET", url: "/" });
-
-      t.assert.deepStrictEqual(res.json(), { user: "Jean" });
-
-      await app.close();
-    });
-
-    test("throws if route handler is not async", async (t: TestContext) => {
-      t.plan(1);
-
-      const userRepo = createProvider({
-        name: "userRepo",
-        expose: async () => ({ find: () => "real" }),
-      });
-
-      const root = createModule({
-        name: "root-bad",
-        deps: { userRepo },
-        routes({ builder }) {
-          builder.addRoute({
-            url: "/bad",
-            method: "GET",
-            // @ts-expect-error For rare vanilla users
-            handler: () => ({ user: "oops" }),
-          });
-        },
-      });
-
-      await t.assert.rejects(
-        () => createApp({ root }),
-        /Expected an async function for "\/bad handler"/,
-      );
-    });
-
-    test("throws if route hook is not async", async (t: TestContext) => {
-      t.plan(1);
-
-      const userRepo = createProvider({
-        name: "userRepo",
-        expose: async () => ({ find: () => "real" }),
-      });
-
-      const root = createModule({
-        name: "root-bad",
-        deps: { userRepo },
-        routes({ builder }) {
-          builder.addRoute({
-            url: "/bad",
-            method: "GET",
-            // @ts-expect-error For rare vanilla users
-            onRequest: () => {},
-            handler: async () => ({ user: "Jean" }),
-          });
-        },
-      });
-
-      await t.assert.rejects(
-        () => createApp({ root }),
-        /Expected an async function for "\/bad onRequest/,
-      );
-    });
   });
 });

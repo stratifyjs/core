@@ -35,7 +35,7 @@ describe("createProvider", () => {
       deps: {
         bar,
       },
-      accessFastify({ fastify, deps }) {
+      fastifyInstaller({ fastify, deps }) {
         t.assert.ok(fastify.log);
         t.assert.deepStrictEqual(deps, {
           bar: { msg: "hello world!" },
@@ -67,7 +67,7 @@ describe("createProvider", () => {
         foo,
         fooChild,
       },
-      accessFastify({ fastify, deps }) {
+      fastifyInstaller({ fastify, deps }) {
         t.assert.ok(fastify.log.error);
         t.assert.deepStrictEqual(deps, {
           foo: { x: 1 },
@@ -246,7 +246,7 @@ describe("createProvider", () => {
     const dbModule = createModule({
       name: "dbModule",
       deps: { db },
-      accessFastify({ fastify, deps }) {
+      fastifyInstaller({ fastify, deps }) {
         fastify.addHook("onClose", async () => {
           await deps.db.onClose();
         });
@@ -462,7 +462,7 @@ describe("createProvider", () => {
     const root = createModule({
       name: "root",
       deps: { repoDouble },
-      accessFastify({ deps }) {
+      fastifyInstaller({ deps }) {
         t.assert.strictEqual(deps.repoDouble, "fake");
       },
     });

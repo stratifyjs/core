@@ -1,23 +1,25 @@
 import type { FastifyInstance } from "fastify";
 import type { ProviderAny } from "../providers";
-import { RoutesBuilder } from "./routes/routes-builder";
+import { RoutesBuilder } from "../routes/routes-builder";
 import { HttpHooksBuilder } from "../hooks/hooks-builder";
 
 type ExposeDeps<Providers extends ProvidersMap> = {
   [K in keyof Providers]: Awaited<ReturnType<Providers[K]["expose"]>>;
-}
+};
 
 export type AccessFastifyCallback<Providers extends ProvidersMap> = (ctx: {
   fastify: FastifyInstance;
   deps: ExposeDeps<Providers>;
 }) => unknown | Promise<unknown>;
 
-export type RoutesCallback<Providers extends ProvidersMap> = (ctx: {
+export type RoutesBuilderCallback<
+  Providers extends ProvidersMap = ProvidersMap,
+> = (ctx: {
   builder: RoutesBuilder;
   deps: ExposeDeps<Providers>;
 }) => unknown | Promise<unknown>;
 
-export type HttpHooksCallback<Providers extends ProvidersMap> = (ctx: {
+export type HttpHooksBuilderCallback<Providers extends ProvidersMap> = (ctx: {
   builder: HttpHooksBuilder;
   deps: ExposeDeps<Providers>;
 }) => unknown | Promise<unknown>;
@@ -35,9 +37,9 @@ export interface ModuleDef<
   deps: Providers;
   subModules: SubModules;
   encapsulate: boolean;
-  accessFastify?: AccessFastifyCallback<Providers>;
-  routes?: RoutesCallback<Providers>;
-  httpHooks?: HttpHooksCallback<Providers>;
+  fastifyInstaller?: AccessFastifyCallback<Providers>;
+  routes?: RoutesBuilderCallback<Providers>;
+  httpHooks?: HttpHooksBuilderCallback<Providers>;
   withProviders(
     updater: (deps: Providers) => Providers,
   ): ModuleDef<Providers, SubModules>;
@@ -52,7 +54,7 @@ export type ModuleOptions<
   deps?: Providers;
   subModules?: SubModules;
   encapsulate?: boolean;
-  accessFastify?: AccessFastifyCallback<Providers>;
-  routes?: RoutesCallback<Providers>;
-  httpHooks?: HttpHooksCallback<Providers>;
+  fastifyInstaller?: AccessFastifyCallback<Providers>;
+  routes?: RoutesBuilderCallback<Providers>;
+  httpHooks?: HttpHooksBuilderCallback<Providers>;
 };

@@ -27,7 +27,7 @@ function createHttpModule(domainIndex) {
   return createModule({
     name: `http-${domainIndex}`,
     deps,
-    accessFastify: ({ fastify, deps }) => {
+    fastifyInstaller: ({ fastify, deps }) => {
       attachPingRoute(fastify, deps, domainIndex);
     },
   });
@@ -36,7 +36,7 @@ function createHttpModule(domainIndex) {
 function createMetricsModule() {
   return createModule({
     name: "metrics",
-    accessFastify: ({ fastify }) => {
+    fastifyInstaller: ({ fastify }) => {
       attachMetricsRoute(fastify, {
         startNs,
         variantLabel: "fastify-di:baseline",

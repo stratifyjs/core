@@ -52,7 +52,7 @@ describe("HttpHooksBuilder", () => {
       assert.throws(
         () => builder.addHook(hook, syncFn as never),
         new RegExp(
-          `Expected an async function for "Hook \\"${hook}\\" in module \\"mod\\""`
+          `Expected an async function for "Hook \\"${hook}\\" in module \\"mod\\""`,
         ),
       );
     }

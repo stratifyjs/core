@@ -1,8 +1,4 @@
-import {
-  FastifyReply,
-  FastifyRequest,
-  RouteOptions,
-} from "fastify";
+import { FastifyReply, FastifyRequest, RouteOptions } from "fastify";
 import {
   OnErrorHookHandler,
   OnPreHandlerHandler,
@@ -14,12 +10,8 @@ import {
   OnResponseHandler,
   OnSendHookHandler,
   OnTimeoutHandler,
-} from "../../hooks/hooks.types";
-
-type RouteHandler = (
-  request: FastifyRequest,
-  reply: FastifyReply,
-) => Promise<unknown>;
+} from "../hooks";
+import { Static, TSchema } from "@sinclair/typebox";
 
 type ErrorHandler = (
   error: unknown,
@@ -43,11 +35,21 @@ export type BaseStratifyRouteOptions = Omit<
   | "errorHandler"
 >;
 
-export interface StratifyRouteOptions extends BaseStratifyRouteOptions {
+export interface StratifyRouteOptions<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  S extends Record<string, unknown> = Record<string, unknown>,
+> extends BaseStratifyRouteOptions {
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | "HEAD";
   url: string;
-  errorHandler?: ErrorHandler
-  handler: RouteHandler;
+  schema?: S;
+  errorHandler?: ErrorHandler;
+
+  handler: (
+    request: FastifyRequest<ExtractRouteGenerics<S>>,
+    reply: FastifyReply,
+  ) => Promise<unknown>;
+
+  // Hooks (async or sync)
   onRequest?: OnRequestHandler | OnRequestHandler[];
   preParsing?: OnPreParsingHandler | OnPreParsingHandler[];
   preValidation?: OnPreValidationHandler | OnPreValidationHandler[];
@@ -59,3 +61,13 @@ export interface StratifyRouteOptions extends BaseStratifyRouteOptions {
   onError?: OnErrorHookHandler | OnErrorHookHandler[];
   onRequestAbort?: OnRequestAbortHandler | OnRequestAbortHandler[];
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ExtractRouteGenerics<S extends Record<string, unknown>> = {
+  Body: S extends { body: TSchema } ? Static<S["body"]> : unknown;
+  Querystring: S extends { querystring: TSchema }
+    ? Static<S["querystring"]>
+    : unknown;
+  Params: S extends { params: TSchema } ? Static<S["params"]> : unknown;
+  Headers: S extends { headers: TSchema } ? Static<S["headers"]> : unknown;
+};

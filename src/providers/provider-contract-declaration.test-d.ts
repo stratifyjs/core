@@ -52,7 +52,7 @@ function createUsersModule(yDep: YContract) {
   return createModule({
     name: "users",
     deps: { yDep },
-    accessFastify({ deps }) {
+    fastifyInstaller({ deps }) {
       expectType<{ y: number }>(deps.yDep);
     },
   });

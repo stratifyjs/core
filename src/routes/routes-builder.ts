@@ -2,13 +2,13 @@ import { FastifyInstance } from "fastify";
 import {
   ensureAsyncCallback,
   ensureAsyncCallbacks,
-} from "../../utils/ensure-async-callback";
+} from "../utils/ensure-async-callback";
 import { StratifyRouteOptions } from "./routes.types";
 
 export class RoutesBuilder {
-  private readonly routes = new Set<StratifyRouteOptions>();
+  private readonly routes = new Set<StratifyRouteOptions<Record<string, unknown>>>();
 
-  addRoute(opts: StratifyRouteOptions) {
+  addRoute<S extends Record<string, unknown>>(opts: StratifyRouteOptions<S>) {
     ensureAsyncCallbacks(`${opts.url} onRequest`, opts.onRequest);
     ensureAsyncCallbacks(`${opts.url} preParsing`, opts.preParsing);
     ensureAsyncCallbacks(`${opts.url} preValidation`, opts.preValidation);
