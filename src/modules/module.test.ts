@@ -341,7 +341,7 @@ describe("module integration", () => {
           builder.addRoute({
             url: "/bad",
             method: "GET",
-            // intentionally not async
+            // @ts-expect-error For rare vanilla users
             handler: () => ({ user: "oops" }),
           });
         },
@@ -368,6 +368,7 @@ describe("module integration", () => {
           builder.addRoute({
             url: "/bad",
             method: "GET",
+            // @ts-expect-error For rare vanilla users
             onRequest: () => {},
             handler: async () => ({ user: "Jean" }),
           });

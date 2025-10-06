@@ -1,19 +1,19 @@
 import { describe, test } from "node:test";
-import type { RouteOptions } from "fastify";
 import assert from "node:assert";
 import { RoutesBuilder } from "./routes-builder";
+import { StratifyRouteOptions } from "./routes.types";
 
 describe("RoutesBuilder", () => {
   test("should add and retrieve routes", () => {
     const builder = new RoutesBuilder();
 
-    const routeA: RouteOptions = {
+    const routeA: StratifyRouteOptions = {
       method: "GET",
       url: "/a",
       handler: async () => "a",
     };
 
-    const routeB: RouteOptions = {
+    const routeB: StratifyRouteOptions = {
       method: "POST",
       url: "/b",
       handler: async () => "b",
@@ -29,7 +29,7 @@ describe("RoutesBuilder", () => {
   test("should not add duplicate route references", () => {
     const builder = new RoutesBuilder();
 
-    const route: RouteOptions = {
+    const route: StratifyRouteOptions = {
       method: "GET",
       url: "/same",
       handler: async () => "same",
@@ -45,7 +45,7 @@ describe("RoutesBuilder", () => {
   test("addRoute should be chainable", () => {
     const builder = new RoutesBuilder();
 
-    const route: RouteOptions = {
+    const route: StratifyRouteOptions = {
       method: "GET",
       url: "/chain",
       handler: async () => "ok",
@@ -75,7 +75,7 @@ describe("RoutesBuilder", () => {
     const builder = new RoutesBuilder();
 
     for (const hook of HOOKS) {
-      const opts: RouteOptions = {
+      const opts: StratifyRouteOptions = {
         method: "GET",
         url: `/${hook}`,
         handler: async () => "ok",
@@ -104,7 +104,7 @@ describe("RoutesBuilder", () => {
     for (const hook of HOOKS) {
       const url = `/${hook}-sync`;
       // Single non-async function
-      const optsSingle: RouteOptions = {
+      const optsSingle: StratifyRouteOptions = {
         method: "GET",
         url,
         handler: async () => "ok",
@@ -117,7 +117,7 @@ describe("RoutesBuilder", () => {
       );
 
       // Array containing a non-async function
-      const optsArray: RouteOptions = {
+      const optsArray: StratifyRouteOptions = {
         method: "GET",
         url: `${url}-array`,
         handler: async () => "ok",
@@ -136,9 +136,10 @@ describe("RoutesBuilder", () => {
   test("throws if handler is not async", () => {
     const builder = new RoutesBuilder();
 
-    const opts: RouteOptions = {
+    const opts: StratifyRouteOptions = {
       method: "GET",
       url: "/bad-handler",
+      // @ts-expect-error For rare vanilla users
       handler: () => "not async",
     };
 
@@ -151,7 +152,7 @@ describe("RoutesBuilder", () => {
   test("handler is async", () => {
     const builder = new RoutesBuilder();
 
-    const opts: RouteOptions = {
+    const opts: StratifyRouteOptions = {
       method: "GET",
       url: "/bad-handler",
       handler: async () => "async",

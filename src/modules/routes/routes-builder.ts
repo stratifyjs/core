@@ -3,11 +3,12 @@ import {
   ensureAsyncCallback,
   ensureAsyncCallbacks,
 } from "../../utils/ensure-async-callback";
+import { StratifyRouteOptions } from "./routes.types";
 
 export class RoutesBuilder {
-  private readonly routes = new Set<RouteOptions>();
+  private readonly routes = new Set<StratifyRouteOptions>();
 
-  addRoute(opts: RouteOptions) {
+  addRoute(opts: StratifyRouteOptions) {
     ensureAsyncCallbacks(`${opts.url} onRequest`, opts.onRequest);
     ensureAsyncCallbacks(`${opts.url} preParsing`, opts.preParsing);
     ensureAsyncCallbacks(`${opts.url} preValidation`, opts.preValidation);
