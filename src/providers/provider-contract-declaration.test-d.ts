@@ -36,7 +36,7 @@ function createYProvider(xDep: XContract): YContract {
     deps: { xDep },
     expose: ({ xDep }) => {
       expectType<{ x: number }>(xDep);
-      return { y: xDep.x++ };
+      return { y: xDep.x };
     },
   });
 }

@@ -6,7 +6,9 @@ import {
 import { StratifyRouteOptions } from "./routes.types";
 
 export class RoutesBuilder {
-  private readonly routes = new Set<StratifyRouteOptions<Record<string, unknown>>>();
+  private readonly routes = new Set<
+    StratifyRouteOptions<Record<string, unknown>>
+  >();
 
   addRoute<S extends Record<string, unknown>>(opts: StratifyRouteOptions<S>) {
     ensureAsyncCallbacks(`${opts.url} onRequest`, opts.onRequest);

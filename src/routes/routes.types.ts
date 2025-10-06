@@ -36,7 +36,6 @@ export type BaseStratifyRouteOptions = Omit<
 >;
 
 export interface StratifyRouteOptions<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   S extends Record<string, unknown> = Record<string, unknown>,
 > extends BaseStratifyRouteOptions {
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | "HEAD";
@@ -62,7 +61,6 @@ export interface StratifyRouteOptions<
   onRequestAbort?: OnRequestAbortHandler | OnRequestAbortHandler[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ExtractRouteGenerics<S extends Record<string, unknown>> = {
   Body: S extends { body: TSchema } ? Static<S["body"]> : unknown;
   Querystring: S extends { querystring: TSchema }

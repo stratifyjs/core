@@ -26,7 +26,7 @@ export type HttpHooksBuilderCallback<Providers extends ProvidersMap> = (ctx: {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ModuleAny = ModuleDef<any, any>;
-export type ProvidersMap = Readonly<Record<string, ProviderAny>>;
+export type ProvidersMap = Record<string, ProviderAny>;
 export type SubModulesMap = ReadonlyArray<ModuleAny>;
 
 export interface ModuleDef<
