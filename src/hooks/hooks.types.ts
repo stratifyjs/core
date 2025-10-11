@@ -84,14 +84,14 @@ type HttpHooksBuilderCallback<Providers extends ProvidersMap> = (ctx: {
 
 export interface HttpHooksOptions<Providers extends ProvidersMap> {
   readonly type: "http";
-  readonly deps: Providers;
-  readonly builder: HttpHooksBuilderCallback<Providers>;
+  readonly deps?: Providers;
+  readonly build: HttpHooksBuilderCallback<Providers>;
 }
 
 export interface HttpHooksConfig<Providers extends ProvidersMap> {
   readonly type: "http";
   readonly deps: Providers;
-  readonly builder: HttpHooksBuilderCallback<Providers>;
+  readonly build: HttpHooksBuilderCallback<Providers>;
   registerHooks(
     fastify: FastifyInstance,
     container: Container,
@@ -136,14 +136,14 @@ type ApplicationHooksBuilderCallback<Providers extends ProvidersMap> = (ctx: {
 
 export interface AppHooksOptions<Providers extends ProvidersMap> {
   readonly type: "app";
-  readonly deps: Providers;
-  readonly builder: ApplicationHooksBuilderCallback<Providers>;
+  readonly deps?: Providers;
+  readonly build: ApplicationHooksBuilderCallback<Providers>;
 }
 
 export interface AppHooksConfig<Providers extends ProvidersMap> {
   readonly type: "app";
   readonly deps: Providers;
-  readonly builder: ApplicationHooksBuilderCallback<Providers>;
+  readonly build: ApplicationHooksBuilderCallback<Providers>;
   registerHooks(
     fastify: FastifyInstance,
     container: Container,

@@ -16,7 +16,7 @@ describe("HTTP hooks builder integration", () => {
     const httpHooks = createHooks({
       type: "http",
       deps: { userRepo },
-      builder: async ({ builder, deps }) => {
+      build: async ({ builder, deps }) => {
         t.assert.deepStrictEqual(deps.userRepo, exposed);
         builder.addHook("onRequest", async (req, reply) => {
           reply.header("x-hook", "executed");
@@ -57,7 +57,7 @@ describe("HTTP hooks builder integration", () => {
     const badHook = createHooks({
       type: "http",
       deps: { userRepo },
-      builder: ({ builder }) => {
+      build: ({ builder }) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         builder.addHook("onRequest", () => {});
@@ -89,7 +89,7 @@ describe("HTTP hooks builder integration", () => {
     const httpHooks = createHooks({
       type: "http",
       deps: {},
-      builder: async ({ builder }) => {
+      build: async ({ builder }) => {
         builder.addHook("onRequest", async (req, reply) => {
           reply.header("x-one", "1");
         });
@@ -154,7 +154,7 @@ describe("HTTP hooks builder integration", () => {
     const hooks = createHooks({
       type: "http",
       deps: { userRepo },
-      builder: async ({ builder, deps }) => {
+      build: async ({ builder, deps }) => {
         t.assert.deepStrictEqual(deps.userRepo, exposed);
 
         builder.addHook("onRequest", async (req, reply) => {
@@ -270,7 +270,7 @@ describe("App hooks builder integration", () => {
     const appHooks = createHooks({
       type: "app",
       deps: {},
-      builder: async ({ builder }) => {
+      build: async ({ builder }) => {
         builder.addHook("onRegister", async (instance, opts) => {
           onRegister_hook_executed = true;
           captured.onRegister.push({ instance, opts });

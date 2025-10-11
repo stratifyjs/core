@@ -22,12 +22,12 @@ export function createHooks<Providers extends ProvidersMap>(
 export function createHooks<Providers extends ProvidersMap>(
   options: HttpHooksOptions<Providers> | AppHooksOptions<Providers>,
 ) {
-  const { type, deps, builder } = options;
+  const { type, deps = {}, build } = options;
 
   return {
     type,
     deps,
-    builder,
+    build,
     async registerHooks(
       fastify: FastifyInstance,
       container: Container,
@@ -40,7 +40,7 @@ export function createHooks<Providers extends ProvidersMap>(
           : new AppHooksBuilder(moduleName);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (builder as any)({ builder: hookBuilder, deps: providerMap });
+      await (build as any)({ builder: hookBuilder, deps: providerMap });
       hookBuilder.register(fastify);
     },
   };
