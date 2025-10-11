@@ -13,13 +13,11 @@ export type AccessFastifyCallback<Providers extends ProvidersMap> = (ctx: {
 export type ModuleAny = ModuleDef<any>;
 export type SubModulesMap = ReadonlyArray<ModuleAny>;
 
-export interface ModuleDef<
-  SubModules extends SubModulesMap,
-> {
+export interface ModuleDef<SubModules extends SubModulesMap> {
   name: string;
   subModules: SubModules;
   encapsulate: boolean;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   installers?: InstallerConfig<any>[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   controllers?: ControllerConfig<any, any>[];
@@ -28,13 +26,11 @@ export interface ModuleDef<
   _mod?: never;
 }
 
-export type ModuleOptions<
-  SubModules extends SubModulesMap,
-> = {
+export type ModuleOptions<SubModules extends SubModulesMap> = {
   name: string;
   subModules?: SubModules;
   encapsulate?: boolean;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   installers?: InstallerConfig<any>[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   controllers?: ControllerConfig<any, any>[];

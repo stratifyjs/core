@@ -11,7 +11,7 @@ export function createAdapter<Value>(
   def: AdapterOptions<Value>,
 ): AdapterDef<Value> {
   const self: AdapterDef<Value> = {
-    name: def.name ?? 'unknown',
+    name: def.name ?? "unknown",
     expose: def.expose,
   };
 

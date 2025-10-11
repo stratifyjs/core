@@ -13,7 +13,12 @@ export function createController<
 >(
   options: ControllerOptions<Providers, Adaps>,
 ): ControllerConfig<Providers, Adaps> {
-  const { deps = {} as Providers, name = 'unknown', adaps = {} as Adaps, build } = options;
+  const {
+    deps = {} as Providers,
+    name = "unknown",
+    adaps = {} as Adaps,
+    build,
+  } = options;
 
   return {
     deps,
@@ -22,10 +27,7 @@ export function createController<
     build,
     async register(fastify, container) {
       const providerMap = await resolveProviderMap(container, deps);
-      const adapterMap = await resolveAdapterMap(
-        fastify,
-        adaps as never,
-      );
+      const adapterMap = await resolveAdapterMap(fastify, adaps as never);
 
       const routesBuilder = new RoutesBuilder();
       await build({

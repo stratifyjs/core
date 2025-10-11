@@ -1,9 +1,5 @@
 import { expectError, expectType } from "tsd";
-import {
-  createProvider,
-  ProviderContract,
-  ProviderDef,
-} from "..";
+import { createProvider, ProviderContract, ProviderDef } from "..";
 
 interface Db {
   url: string;

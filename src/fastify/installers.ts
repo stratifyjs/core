@@ -2,15 +2,12 @@ import type { FastifyInstance } from "fastify";
 import type { ProvidersMap } from "../../src/providers";
 import type { Container } from "../../src/container/container";
 import { resolveProviderMap } from "../../src/modules";
-import type {
-  InstallerOptions,
-  InstallerConfig,
-} from "./installers.types";
+import type { InstallerOptions, InstallerConfig } from "./installers.types";
 
 export function createInstaller<Providers extends ProvidersMap>(
   options: InstallerOptions<Providers>,
 ): InstallerConfig<Providers> {
-  const { deps = {} as Providers, name = 'unknown', install } = options;
+  const { deps = {} as Providers, name = "unknown", install } = options;
 
   return {
     deps,

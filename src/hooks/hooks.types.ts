@@ -78,13 +78,19 @@ export type HttpHookHandlers<K extends keyof HttpHookMap> = HttpHookMap[K];
 export type HttpHookHandler<K extends keyof HttpHookMap> =
   HttpHookHandlers<K>[number];
 
-type HttpHooksBuilderCallback<Providers extends ProvidersMap, Adaps extends AdapterMap> = (ctx: {
+type HttpHooksBuilderCallback<
+  Providers extends ProvidersMap,
+  Adaps extends AdapterMap,
+> = (ctx: {
   builder: HttpHooksBuilder;
   deps: ExposeDeps<Providers>;
   adaps: AdapterValues<Adaps>;
 }) => unknown | Promise<unknown>;
 
-export interface HttpHooksOptions<Providers extends ProvidersMap, Adaps extends AdapterMap> {
+export interface HttpHooksOptions<
+  Providers extends ProvidersMap,
+  Adaps extends AdapterMap,
+> {
   readonly type: "http";
   readonly deps?: Providers;
   readonly adaps?: Adaps;
@@ -92,7 +98,10 @@ export interface HttpHooksOptions<Providers extends ProvidersMap, Adaps extends 
   readonly build: HttpHooksBuilderCallback<Providers, Adaps>;
 }
 
-export interface HttpHooksConfig<Providers extends ProvidersMap, Adaps extends AdapterMap> {
+export interface HttpHooksConfig<
+  Providers extends ProvidersMap,
+  Adaps extends AdapterMap,
+> {
   readonly type: "http";
   readonly deps: Providers;
   readonly adaps: Adaps;
@@ -135,13 +144,19 @@ export type AppHookMap = {
   preClose: OnPreCloseHandler[];
 };
 
-type ApplicationHooksBuilderCallback<Providers extends ProvidersMap, Adaps extends AdapterMap> = (ctx: {
+type ApplicationHooksBuilderCallback<
+  Providers extends ProvidersMap,
+  Adaps extends AdapterMap,
+> = (ctx: {
   builder: AppHooksBuilder;
   deps: ExposeDeps<Providers>;
-  adaps: AdapterValues<Adaps>
+  adaps: AdapterValues<Adaps>;
 }) => unknown | Promise<unknown>;
 
-export interface AppHooksOptions<Providers extends ProvidersMap, Adaps extends AdapterMap> {
+export interface AppHooksOptions<
+  Providers extends ProvidersMap,
+  Adaps extends AdapterMap,
+> {
   readonly type: "app";
   readonly deps?: Providers;
   readonly adaps?: Adaps;
@@ -149,7 +164,10 @@ export interface AppHooksOptions<Providers extends ProvidersMap, Adaps extends A
   readonly build: ApplicationHooksBuilderCallback<Providers, Adaps>;
 }
 
-export interface AppHooksConfig<Providers extends ProvidersMap, Adaps extends AdapterMap> {
+export interface AppHooksConfig<
+  Providers extends ProvidersMap,
+  Adaps extends AdapterMap,
+> {
   readonly type: "app";
   readonly deps: Providers;
   readonly adaps: Adaps;

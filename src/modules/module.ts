@@ -20,9 +20,9 @@ export function getModuleId(mod: ModuleAny): string {
   return (mod as never)[kModuleId];
 }
 
-export function createModule<
-  const SubModules extends SubModulesMap,
->(def: ModuleOptions<SubModules>): ModuleDef<SubModules> {
+export function createModule<const SubModules extends SubModulesMap>(
+  def: ModuleOptions<SubModules>,
+): ModuleDef<SubModules> {
   const self = {
     name: def.name,
     subModules: (def.subModules ?? []) as SubModules,

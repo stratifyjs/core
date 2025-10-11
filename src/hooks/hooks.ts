@@ -32,7 +32,7 @@ export function createHooks<
     | HttpHooksOptions<Providers, Adaps>
     | AppHooksOptions<Providers, Adaps>,
 ) {
-  const { type, deps = {}, name = 'unknown', adaps = {}, build } = options;
+  const { type, deps = {}, name = "unknown", adaps = {}, build } = options;
 
   return {
     type,
@@ -53,7 +53,11 @@ export function createHooks<
           : new AppHooksBuilder(moduleName);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (build as any)({ builder: hookBuilder, deps: providerMap, adaps: adapsMap });
+      await (build as any)({
+        builder: hookBuilder,
+        deps: providerMap,
+        adaps: adapsMap,
+      });
       hookBuilder.register(fastify);
     },
   };

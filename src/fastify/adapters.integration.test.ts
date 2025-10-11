@@ -1,15 +1,10 @@
 import { describe, test, TestContext } from "node:test";
-import {
-  createApp,
-  createModule,
-  createController,
-  createAdapter,
-} from "..";
+import { createApp, createModule, createController, createAdapter } from "..";
 
 describe("adapters integration", () => {
   test("registers installers", async (t: TestContext) => {
     t.plan(1);
-    
+
     const versionAdapter = createAdapter({
       expose: async ({ fastify }) => fastify.version,
     });

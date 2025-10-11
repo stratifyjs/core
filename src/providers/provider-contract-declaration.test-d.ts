@@ -1,8 +1,5 @@
 import { expectType } from "tsd";
-import {
-  createProvider,
-  ProviderContract,
-} from "..";
+import { createProvider, ProviderContract } from "..";
 
 // Ports
 interface X {

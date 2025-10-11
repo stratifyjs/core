@@ -1,12 +1,6 @@
 import { AdapterAny } from "../fastify";
-import {
-  getModuleId,
-  type ModuleAny,
-} from "../modules";
-import {
-  getProviderId,
-  type ProviderAny,
-} from "../providers";
+import { getModuleId, type ModuleAny } from "../modules";
+import { getProviderId, type ProviderAny } from "../providers";
 
 const useColor = process.stdout.isTTY;
 const wrap = (code: number, s: string, enabled: boolean) => {
@@ -30,7 +24,9 @@ export function describeTree(root: ModuleAny): string {
 
   function walkProvider(p: ProviderAny, depth: number) {
     const lifeCol =
-      p.lifecycle === "transient" ? c.yellow("transient") : c.green("singleton");
+      p.lifecycle === "transient"
+        ? c.yellow("transient")
+        : c.green("singleton");
     lines.push(
       `${pad(depth)}🔧 ${c.dim("prov")} ${c.cyan(`${p.name}@${getProviderId(p)}`)} [${lifeCol}]`,
     );
@@ -69,17 +65,17 @@ export function describeTree(root: ModuleAny): string {
     );
 
     // hooks
-    for (const hook of (m.hooks ?? [])) {
+    for (const hook of m.hooks ?? []) {
       walkConfig("🪝", `hooks ${hook.name}`, hook, depth + 1);
     }
 
     // installers
-    for (const inst of (m.installers ?? [])) {
+    for (const inst of m.installers ?? []) {
       walkConfig("⚙️", `installer ${inst.name}`, inst, depth + 1);
     }
 
     // controllers
-    for (const ctrl of (m.controllers ?? [])) {
+    for (const ctrl of m.controllers ?? []) {
       walkConfig("🧭", `controller ${ctrl.name}`, ctrl, depth + 1);
     }
 

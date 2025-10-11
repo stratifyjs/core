@@ -7,21 +7,13 @@ export type AdapterValues<M extends AdapterMap> = {
   [K in keyof M]: Awaited<ReturnType<M[K]["expose"]>>;
 };
 
-export interface AdapterOptions<
-  Value = unknown,
-> {
+export interface AdapterOptions<Value = unknown> {
   name?: string;
-  expose: (ctx: {
-    fastify: FastifyInstance;
-  }) => Value | Promise<Value>;
+  expose: (ctx: { fastify: FastifyInstance }) => Value | Promise<Value>;
 }
 
-export interface AdapterDef<
-  Value = unknown,
-> {
+export interface AdapterDef<Value = unknown> {
   name: string;
-  expose: (ctx: {
-    fastify: FastifyInstance;
-  }) => Value | Promise<Value>;
+  expose: (ctx: { fastify: FastifyInstance }) => Value | Promise<Value>;
   _adapter?: never;
 }

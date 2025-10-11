@@ -33,33 +33,33 @@ describe("describeTree", () => {
     const siblingAdapter = createAdapter({
       name: "siblingAdapter",
       expose: async () => ({
-        info: '',
+        info: "",
       }),
     });
 
     const hooksA = createHooks({
       type: "app",
-      name: 'a',
+      name: "a",
       deps: { grandChildProv },
       adaps: { siblingAdapter },
       build: async () => {},
     });
 
     const installerA = createInstaller({
-      name: 'a',
+      name: "a",
       deps: { siblingProv },
       install: async () => {},
     });
 
     const installerB = createInstaller({
-      name: 'b',
+      name: "b",
       install: async () => {},
     });
 
     const controllerA = createController({
       deps: { siblingDependent },
       adaps: { siblingAdapter },
-      name: 'a',
+      name: "a",
       build: async () => {},
     });
 

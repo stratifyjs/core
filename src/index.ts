@@ -12,7 +12,7 @@ export * from "./fastify";
 import { getProviderId, resolveDeps, type ProviderAny } from "./providers";
 import { Container } from "./container/container";
 import { describeTree } from "./printer/describe-tree";
-import {  getModuleId, ModuleAny, registerModule } from "./modules";
+import { getModuleId, ModuleAny, registerModule } from "./modules";
 
 export interface CreateAppOptions {
   serverOptions?: FastifyServerOptions;
@@ -103,7 +103,7 @@ function walkProviders(p: ProviderAny, visit: (p: ProviderAny) => void): void {
 
 function collectProvidersFromConfig(
   config: {
-    deps: Record<string, unknown>
+    deps: Record<string, unknown>;
   },
   allProviders: Set<ProviderAny>,
   providerNameToId: InstancesMap,
