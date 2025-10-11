@@ -1,10 +1,7 @@
 import { expectType } from "tsd";
 import {
   createProvider,
-  createModule,
   ProviderContract,
-  ModuleDef,
-  ModuleAny,
 } from "..";
 
 // Ports
@@ -46,24 +43,3 @@ expectType<YContract>(y);
 
 const yBis = createYProvider(xBis);
 expectType<YContract>(yBis);
-
-// Modules
-function createUsersModule(yDep: YContract) {
-  return createModule({
-    name: "users",
-    deps: { yDep },
-    fastifyInstaller({ deps }) {
-      expectType<{ y: number }>(deps.yDep);
-    },
-  });
-}
-
-const users = createUsersModule(y);
-expectType<
-  ModuleDef<
-    {
-      readonly yDep: YContract;
-    },
-    readonly ModuleAny[]
-  >
->(users);

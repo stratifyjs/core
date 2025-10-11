@@ -7,11 +7,12 @@ export * from "./providers";
 export * from "./modules";
 export * from "./hooks";
 export * from "./controllers";
+export * from "./fastify";
 
 import { getProviderId, resolveDeps, type ProviderAny } from "./providers";
 import { Container } from "./container/container";
 import { describeTree } from "./printer/describe-tree";
-import { getModuleId, ModuleAny, registerModule } from "./modules";
+import {  getModuleId, ModuleAny, registerModule } from "./modules";
 
 export interface CreateAppOptions {
   serverOptions?: FastifyServerOptions;
@@ -38,12 +39,17 @@ export async function createApp({
   const allProviders = new Set<ProviderAny>();
   walkModules(root, (m) => {
     ensureModuleNameUnicity(moduleNameToId, m);
-    Object.values(m.deps).forEach((p) => {
-      walkProviders(p as ProviderAny, (pp) => {
-        ensureProviderNameUnicity(providerNameToId, pp as ProviderAny);
-        allProviders.add(pp as ProviderAny);
-      });
-    });
+    for (const hook of m.hooks ?? []) {
+      collectProvidersFromConfig(hook, allProviders, providerNameToId);
+    }
+
+    for (const controller of m.controllers ?? []) {
+      collectProvidersFromConfig(controller, allProviders, providerNameToId);
+    }
+
+    for (const installer of m.installers ?? []) {
+      collectProvidersFromConfig(installer, allProviders, providerNameToId);
+    }
   });
 
   const container = new Container();
@@ -92,6 +98,22 @@ function walkProviders(p: ProviderAny, visit: (p: ProviderAny) => void): void {
   visit(p);
   for (const dep of Object.values(p.deps)) {
     walkProviders(dep as ProviderAny, visit);
+  }
+}
+
+function collectProvidersFromConfig(
+  config: {
+    deps: Record<string, unknown>
+  },
+  allProviders: Set<ProviderAny>,
+  providerNameToId: InstancesMap,
+): void {
+  const deps = config.deps ?? {};
+  for (const p of Object.values(deps)) {
+    walkProviders(p as ProviderAny, (pp) => {
+      ensureProviderNameUnicity(providerNameToId, pp);
+      allProviders.add(pp);
+    });
   }
 }
 

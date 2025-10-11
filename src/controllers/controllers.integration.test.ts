@@ -1,12 +1,12 @@
 import test, { describe, TestContext } from "node:test";
 import { createProvider } from "../providers";
 import { createModule } from "../modules";
-import { createApp } from "..";
-import { createController } from "./controller";
+import { createAdapter, createApp } from "..";
+import { createController } from "./controllers";
 
 describe("routes builder integration", () => {
   test("registers route defined through the builder", async (t: TestContext) => {
-    t.plan(2);
+    t.plan(3);
 
     const exposed = { find: () => "Jean" };
     const userRepo = createProvider({
@@ -14,10 +14,16 @@ describe("routes builder integration", () => {
       expose: async () => exposed,
     });
 
+    const versionAdapter = createAdapter({
+      expose: async ({ fastify }) => fastify.version,
+    });
+
     const controller = createController({
-      deps: {userRepo},
-      build({ builder, deps }) {
+      deps: { userRepo },
+      adaps: { versionAdapter },
+      build({ builder, deps, adaps }) {
         t.assert.deepEqual(deps.userRepo, exposed);
+        t.assert.ok(typeof adaps.versionAdapter === "string");
 
         builder.addRoute({
           url: "/",
@@ -31,7 +37,6 @@ describe("routes builder integration", () => {
 
     const root = createModule({
       name: "root",
-      deps: { userRepo },
       controllers: [controller],
     });
 
@@ -46,11 +51,6 @@ describe("routes builder integration", () => {
   test("throws if route handler is not async", async (t: TestContext) => {
     t.plan(1);
 
-    const userRepo = createProvider({
-      name: "userRepo",
-      expose: async () => ({ find: () => "real" }),
-    });
-
     const controller = createController({
       build({ builder }) {
         builder.addRoute({
@@ -64,7 +64,6 @@ describe("routes builder integration", () => {
 
     const root = createModule({
       name: "root-bad",
-      deps: { userRepo },
       controllers: [controller],
     });
 
@@ -76,11 +75,6 @@ describe("routes builder integration", () => {
 
   test("throws if route hook is not async", async (t: TestContext) => {
     t.plan(1);
-
-    const userRepo = createProvider({
-      name: "userRepo",
-      expose: async () => ({ find: () => "real" }),
-    });
 
     const controller = createController({
       build({ builder }) {
@@ -96,8 +90,7 @@ describe("routes builder integration", () => {
 
     const root = createModule({
       name: "root-bad",
-      deps: { userRepo },
-      controllers: [controller]
+      controllers: [controller],
     });
 
     await t.assert.rejects(

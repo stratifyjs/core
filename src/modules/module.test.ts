@@ -1,34 +1,33 @@
 import { describe, test, TestContext } from "node:test";
 import { createModule } from "./module";
-import { createApp, createProvider } from "..";
+import { createApp, createInstaller } from "..";
 
 describe("module integration", () => {
   test("createModule defaults + describeTree presence", async (t: TestContext) => {
     t.plan(2);
 
-    const root = createModule({
-      name: "root-defaults",
-      fastifyInstaller({ fastify, deps }) {
+    const installer = createInstaller({
+      deps: {},
+      install: async ({ fastify, deps }) => {
         t.assert.ok(fastify.log);
         t.assert.deepStrictEqual(deps, {});
       },
     });
 
-    const app = await createApp({ root });
+    const root = createModule({
+      name: "root-defaults",
+      installers: [installer],
+    });
 
+    const app = await createApp({ root });
     await app.close();
   });
 
   test("Alias name subModules should not be allowed", async (t: TestContext) => {
     t.plan(1);
 
-    const foo = createModule({
-      name: "foo",
-    });
-
-    const fooAlias = createModule({
-      name: "foo",
-    });
+    const foo = createModule({ name: "foo" });
+    const fooAlias = createModule({ name: "foo" });
 
     const root = createModule({
       name: "root",
@@ -44,13 +43,8 @@ describe("module integration", () => {
   test("Alias in nested subModules should not be allowed", async (t: TestContext) => {
     t.plan(1);
 
-    const foo = createModule({
-      name: "foo",
-    });
-
-    const fooAlias = createModule({
-      name: "foo",
-    });
+    const foo = createModule({ name: "foo" });
+    const fooAlias = createModule({ name: "foo" });
 
     const root = createModule({
       name: "root",
@@ -72,20 +66,30 @@ describe("module integration", () => {
   test("encapsulation=true (default) isolates decorations between sibling subModules", async (t: TestContext) => {
     t.plan(2);
 
-    const subA = createModule({
-      name: "subA",
-      fastifyInstaller: async ({ fastify }) => {
+    const subAInstaller = createInstaller({
+      deps: {},
+      install: async ({ fastify }) => {
         fastify.decorate("onlyA", 123);
       },
     });
 
-    const subB = createModule({
-      name: "subB",
-      fastifyInstaller: async ({ fastify }) => {
+    const subBInstaller = createInstaller({
+      deps: {},
+      install: async ({ fastify }) => {
         t.assert.throws(() => fastify.getDecorator("onlyA"), {
           code: "FST_ERR_DEC_UNDECLARED",
         });
       },
+    });
+
+    const subA = createModule({
+      name: "subA",
+      installers: [subAInstaller],
+    });
+
+    const subB = createModule({
+      name: "subB",
+      installers: [subBInstaller],
     });
 
     const root = createModule({
@@ -104,23 +108,38 @@ describe("module integration", () => {
   test("encapsulation=true share context with subModules", async (t: TestContext) => {
     t.plan(2);
 
-    const subA = createModule({
-      name: "subA",
-      fastifyInstaller: async ({ fastify }) => {
+    const subAInstaller = createInstaller({
+      deps: {},
+      install: async ({ fastify }) => {
         fastify.decorate("onlyA", 123);
       },
+    });
+
+    const childInstaller = createInstaller({
+      deps: {},
+      install: async ({ fastify }) => {
+        t.assert.strictEqual(fastify.getDecorator("onlyA"), 123);
+      },
+    });
+
+    const grandChildInstaller = createInstaller({
+      deps: {},
+      install: async ({ fastify }) => {
+        t.assert.strictEqual(fastify.getDecorator("onlyA"), 123);
+      },
+    });
+
+    const subA = createModule({
+      name: "subA",
+      installers: [subAInstaller],
       subModules: [
         createModule({
           name: "child",
-          fastifyInstaller: async ({ fastify }) => {
-            t.assert.strictEqual(fastify.getDecorator("onlyA"), 123);
-          },
+          installers: [childInstaller],
           subModules: [
             createModule({
               name: "grand-child",
-              fastifyInstaller: async ({ fastify }) => {
-                t.assert.strictEqual(fastify.getDecorator("onlyA"), 123);
-              },
+              installers: [grandChildInstaller],
             }),
           ],
         }),
@@ -133,36 +152,50 @@ describe("module integration", () => {
     });
 
     const app = await createApp({ root });
-
     await app.close();
   });
 
   test("encapsulation=false exposes decorations to siblings", async (t: TestContext) => {
     t.plan(2);
 
+    const openAInstaller = createInstaller({
+      deps: {},
+      install: async ({ fastify }) => {
+        fastify.decorate("shared", true);
+      },
+    });
+
+    const subOpenAInstaller = createInstaller({
+      deps: {},
+      install: async ({ fastify }) => {
+        fastify.decorate("subShared", true);
+      },
+    });
+
+    const openBInstaller = createInstaller({
+      deps: {},
+      install: async ({ fastify }) => {
+        t.assert.strictEqual(fastify.getDecorator("shared"), true);
+        t.assert.strictEqual(fastify.getDecorator("subShared"), true);
+      },
+    });
+
     const openA = createModule({
       name: "openA",
       encapsulate: false,
-      fastifyInstaller: async ({ fastify }) => {
-        fastify.decorate("shared", true);
-      },
+      installers: [openAInstaller],
       subModules: [
         createModule({
           name: "subOpenA",
           encapsulate: false,
-          fastifyInstaller: async ({ fastify }) => {
-            fastify.decorate("subShared", true);
-          },
+          installers: [subOpenAInstaller],
         }),
       ],
     });
 
     const openB = createModule({
       name: "openB",
-      fastifyInstaller: async ({ fastify }) => {
-        t.assert.strictEqual(fastify.getDecorator("shared"), true);
-        t.assert.strictEqual(fastify.getDecorator("subShared"), true);
-      },
+      installers: [openBInstaller],
     });
 
     const root = createModule({
@@ -171,12 +204,27 @@ describe("module integration", () => {
     });
 
     const app = await createApp({ root });
-
     await app.close();
   });
 
   test("encapsulation=false do not propagate to parents", async (t: TestContext) => {
     t.plan(2);
+
+    const subOpenAInstaller = createInstaller({
+      deps: {},
+      install: async ({ fastify }) => {
+        fastify.decorate("subShared", true);
+      },
+    });
+
+    const openBInstaller = createInstaller({
+      deps: {},
+      install: async ({ fastify }) => {
+        t.assert.throws(() => fastify.getDecorator("subShared"), {
+          code: "FST_ERR_DEC_UNDECLARED",
+        });
+      },
+    });
 
     const openA = createModule({
       name: "openA",
@@ -184,20 +232,14 @@ describe("module integration", () => {
         createModule({
           name: "subOpenA",
           encapsulate: false,
-          fastifyInstaller: async ({ fastify }) => {
-            fastify.decorate("subShared", true);
-          },
+          installers: [subOpenAInstaller],
         }),
       ],
     });
 
     const openB = createModule({
       name: "openB",
-      fastifyInstaller: async ({ fastify }) => {
-        t.assert.throws(() => fastify.getDecorator("subShared"), {
-          code: "FST_ERR_DEC_UNDECLARED",
-        });
-      },
+      installers: [openBInstaller],
     });
 
     const root = createModule({
@@ -214,8 +256,24 @@ describe("module integration", () => {
     await app.close();
   });
 
-  test("encapsulation=false do not exposes encapsulated submodules decorations to siblings", async (t: TestContext) => {
+  test("encapsulation=false do not expose encapsulated submodules decorations to siblings", async (t: TestContext) => {
     t.plan(1);
+
+    const subOpenAEncapsulatedInstaller = createInstaller({
+      deps: {},
+      install: async ({ fastify }) => {
+        fastify.decorate("subEncapsulated", true);
+      },
+    });
+
+    const openBInstaller = createInstaller({
+      deps: {},
+      install: async ({ fastify }) => {
+        t.assert.throws(() => fastify.getDecorator("subEncapsulated"), {
+          code: "FST_ERR_DEC_UNDECLARED",
+        });
+      },
+    });
 
     const openA = createModule({
       name: "openA",
@@ -224,20 +282,14 @@ describe("module integration", () => {
         createModule({
           name: "subOpenAEncapsulated",
           encapsulate: true,
-          fastifyInstaller: async ({ fastify }) => {
-            fastify.decorate("subEncapsulated", true);
-          },
+          installers: [subOpenAEncapsulatedInstaller],
         }),
       ],
     });
 
     const openB = createModule({
       name: "openB",
-      fastifyInstaller: async ({ fastify }) => {
-        t.assert.throws(() => fastify.getDecorator("subEncapsulated"), {
-          code: "FST_ERR_DEC_UNDECLARED",
-        });
-      },
+      installers: [openBInstaller],
     });
 
     const root = createModule({
@@ -246,48 +298,6 @@ describe("module integration", () => {
     });
 
     const app = await createApp({ root });
-
     await app.close();
-  });
-
-  test("module.withProviders replaces a provider with fake", async (t: TestContext) => {
-    t.plan(1);
-
-    const userRepo = createProvider({
-      name: "userRepo",
-      expose: async () => ({ find: () => "real" as string }),
-    });
-
-    const foundValues: string[] = [];
-    const root = createModule({
-      name: "root",
-      deps: { userRepo },
-      fastifyInstaller({ deps }) {
-        foundValues.push(deps.userRepo.find());
-      },
-    });
-
-    const fakeUserRepo = createProvider({
-      name: "userRepo",
-      expose: async () => ({ find: () => "fake" as string }),
-    });
-
-    const rootDouble = root.withProviders((providers) => ({
-      ...providers,
-      userRepo: fakeUserRepo,
-    }));
-
-    const app = await createApp({
-      root: root,
-    });
-
-    const doubleApp = await createApp({
-      root: rootDouble,
-    });
-
-    t.assert.deepStrictEqual(foundValues, ["real", "fake"]);
-
-    await app.close();
-    await doubleApp.close();
   });
 });

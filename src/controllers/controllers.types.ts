@@ -20,6 +20,7 @@ import { Static, TSchema } from "@sinclair/typebox";
 import { ExposeDeps, ProvidersMap } from "../providers";
 import { RoutesBuilder } from "./routes-builder";
 import { Container } from "../container/container";
+import { AdapterMap, AdapterValues } from "../fastify";
 
 type ErrorHandler = (
   error: unknown,
@@ -78,22 +79,34 @@ export type ExtractRouteGenerics<S extends Record<string, unknown>> = {
   Headers: S extends { headers: TSchema } ? Static<S["headers"]> : unknown;
 };
 
-export interface ControllerOptions<Providers extends ProvidersMap> {
+export interface ControllerOptions<
+  Providers extends ProvidersMap,
+  Adaps extends AdapterMap,
+> {
   deps?: Providers;
-  build: ControllerBuilderCallback<Providers>;
+  adaps?: Adaps;
+  name?: string;
+  build: ControllerBuilderCallback<Providers, Adaps>;
 }
 
 export type ControllerBuilderCallback<
-  Providers extends ProvidersMap = ProvidersMap,
+  Providers extends ProvidersMap,
+  Adaps extends AdapterMap,
 > = (ctx: {
   builder: RoutesBuilder;
   deps: ExposeDeps<Providers>;
+  adaps: AdapterValues<Adaps>;
 }) => unknown | Promise<unknown>;
 
-export interface ControllerConfig<Providers extends ProvidersMap> {
+export interface ControllerConfig<
+  Providers extends ProvidersMap,
+  Adaps extends AdapterMap,
+> {
   deps: Providers;
-  build: ControllerBuilderCallback<Providers>;
-  registerRoutes(
+  adaps: Adaps;
+  name: string;
+  build: ControllerBuilderCallback<Providers, Adaps>;
+  register(
     fastify: FastifyInstance,
     container: Container,
     moduleName: string,

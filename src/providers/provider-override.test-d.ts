@@ -1,9 +1,6 @@
 import { expectError, expectType } from "tsd";
 import {
-  createModule,
   createProvider,
-  ModuleAny,
-  ModuleDef,
   ProviderContract,
   ProviderDef,
 } from "..";
@@ -49,48 +46,3 @@ expectType<
 >(repoDouble);
 
 expectError(repo.withProviders((deps) => ({ ...deps, db: 1 })));
-
-const usersModule = createModule({
-  name: "users",
-  deps: { repo },
-});
-
-const usersModuleDouble = usersModule.withProviders((providers) => ({
-  ...providers,
-  repo,
-}));
-
-expectType<
-  ModuleDef<
-    {
-      readonly repo: ProviderDef<
-        {
-          readonly db: DbContract;
-        },
-        string
-      >;
-    },
-    readonly ModuleAny[]
-  >
->(usersModule);
-
-expectType<
-  ModuleDef<
-    {
-      readonly repo: ProviderDef<
-        {
-          readonly db: DbContract;
-        },
-        string
-      >;
-    },
-    readonly ModuleAny[]
-  >
->(usersModuleDouble);
-
-expectError(
-  usersModule.withProviders((providers) => ({
-    ...providers,
-    repo: 123,
-  })),
-);

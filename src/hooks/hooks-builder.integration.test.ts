@@ -1,13 +1,23 @@
 import { describe, test, TestContext } from "node:test";
-import { createApp, createModule, createProvider } from "..";
+import {
+  createAdapter,
+  createApp,
+  createInstaller,
+  createModule,
+  createProvider,
+} from "..";
 import { createHooks } from "./hooks";
-import { createController } from "../controllers/controller";
+import { createController } from "../controllers/controllers";
 
 describe("HTTP hooks builder integration", () => {
   test("registers HTTP hooks defined through createHooks", async (t: TestContext) => {
-    t.plan(3);
+    t.plan(4);
 
     const exposed = { find: () => "Jean" };
+
+    const versionAdapter = createAdapter({
+      expose: async ({ fastify }) => fastify.version,
+    });
 
     const userRepo = createProvider({
       name: "userRepo",
@@ -17,8 +27,10 @@ describe("HTTP hooks builder integration", () => {
     const httpHooks = createHooks({
       type: "http",
       deps: { userRepo },
-      build: async ({ builder, deps }) => {
+      adaps: { versionAdapter },
+      build: async ({ builder, deps, adaps }) => {
         t.assert.deepStrictEqual(deps.userRepo, exposed);
+        t.assert.ok(typeof adaps.versionAdapter === "string");
         builder.addHook("onRequest", async (req, reply) => {
           reply.header("x-hook", "executed");
         });
@@ -37,7 +49,6 @@ describe("HTTP hooks builder integration", () => {
 
     const root = createModule({
       name: "root",
-      deps: { userRepo },
       hooks: [httpHooks],
       controllers: [controller],
     });
@@ -81,7 +92,6 @@ describe("HTTP hooks builder integration", () => {
 
     const root = createModule({
       name: "root-bad-hook",
-      deps: { userRepo },
       hooks: [badHook],
       controllers: [controller],
     });
@@ -232,7 +242,6 @@ describe("HTTP hooks builder integration", () => {
 
     const root = createModule({
       name: "root-http-hooks-all",
-      deps: { userRepo },
       hooks: [hooks],
       controllers: [controller],
     });
@@ -326,11 +335,8 @@ describe("App hooks builder integration", () => {
       },
     });
 
-    const root = createModule({
-      name: "root-all-hooks",
-      hooks: [appHooks],
-      controllers: [controller],
-      fastifyInstaller: ({ fastify }) => {
+    const installer = createInstaller({
+      install({ fastify }) {
         fastify.register(
           async (sub) => {
             sub.get("/plugin", async () => ({ plugin: true }));
@@ -338,6 +344,13 @@ describe("App hooks builder integration", () => {
           { prefix: "/plugin" },
         );
       },
+    });
+
+    const root = createModule({
+      name: "root-all-hooks",
+      hooks: [appHooks],
+      controllers: [controller],
+      installers: [installer],
     });
 
     const app = await createApp({ root });

@@ -12,6 +12,7 @@ import { HttpHooksBuilder } from "./http-hooks-builder";
 import { ExposeDeps, ProvidersMap } from "../providers";
 import { Container } from "../container/container";
 import { AppHooksBuilder } from "./application-hooks-builder";
+import { AdapterMap, AdapterValues } from "../fastify";
 
 // --- HTTP  hooks ---
 export type OnRequestHandler = (
@@ -77,22 +78,27 @@ export type HttpHookHandlers<K extends keyof HttpHookMap> = HttpHookMap[K];
 export type HttpHookHandler<K extends keyof HttpHookMap> =
   HttpHookHandlers<K>[number];
 
-type HttpHooksBuilderCallback<Providers extends ProvidersMap> = (ctx: {
+type HttpHooksBuilderCallback<Providers extends ProvidersMap, Adaps extends AdapterMap> = (ctx: {
   builder: HttpHooksBuilder;
   deps: ExposeDeps<Providers>;
+  adaps: AdapterValues<Adaps>;
 }) => unknown | Promise<unknown>;
 
-export interface HttpHooksOptions<Providers extends ProvidersMap> {
+export interface HttpHooksOptions<Providers extends ProvidersMap, Adaps extends AdapterMap> {
   readonly type: "http";
   readonly deps?: Providers;
-  readonly build: HttpHooksBuilderCallback<Providers>;
+  readonly adaps?: Adaps;
+  readonly name?: string;
+  readonly build: HttpHooksBuilderCallback<Providers, Adaps>;
 }
 
-export interface HttpHooksConfig<Providers extends ProvidersMap> {
+export interface HttpHooksConfig<Providers extends ProvidersMap, Adaps extends AdapterMap> {
   readonly type: "http";
   readonly deps: Providers;
-  readonly build: HttpHooksBuilderCallback<Providers>;
-  registerHooks(
+  readonly adaps: Adaps;
+  readonly name: string;
+  readonly build: HttpHooksBuilderCallback<Providers, Adaps>;
+  register(
     fastify: FastifyInstance,
     container: Container,
     moduleName: string,
@@ -129,22 +135,27 @@ export type AppHookMap = {
   preClose: OnPreCloseHandler[];
 };
 
-type ApplicationHooksBuilderCallback<Providers extends ProvidersMap> = (ctx: {
+type ApplicationHooksBuilderCallback<Providers extends ProvidersMap, Adaps extends AdapterMap> = (ctx: {
   builder: AppHooksBuilder;
   deps: ExposeDeps<Providers>;
+  adaps: AdapterValues<Adaps>
 }) => unknown | Promise<unknown>;
 
-export interface AppHooksOptions<Providers extends ProvidersMap> {
+export interface AppHooksOptions<Providers extends ProvidersMap, Adaps extends AdapterMap> {
   readonly type: "app";
   readonly deps?: Providers;
-  readonly build: ApplicationHooksBuilderCallback<Providers>;
+  readonly adaps?: Adaps;
+  readonly name?: string;
+  readonly build: ApplicationHooksBuilderCallback<Providers, Adaps>;
 }
 
-export interface AppHooksConfig<Providers extends ProvidersMap> {
+export interface AppHooksConfig<Providers extends ProvidersMap, Adaps extends AdapterMap> {
   readonly type: "app";
   readonly deps: Providers;
-  readonly build: ApplicationHooksBuilderCallback<Providers>;
-  registerHooks(
+  readonly adaps: Adaps;
+  readonly name: string;
+  readonly build: ApplicationHooksBuilderCallback<Providers, Adaps>;
+  register(
     fastify: FastifyInstance,
     container: Container,
     moduleName: string,

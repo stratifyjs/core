@@ -1,7 +1,7 @@
 import { Type } from "@sinclair/typebox";
 import { createModule } from "../modules";
 import { expectType } from "tsd";
-import { createController } from "./controller";
+import { createController } from "./controllers";
 
 const CreateUserSchema = {
   body: Type.Object({

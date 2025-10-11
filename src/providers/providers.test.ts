@@ -1,7 +1,7 @@
 import { describe, test, TestContext } from "node:test";
 import { createProvider } from "./providers";
 import { createModule } from "../modules";
-import { createApp } from "..";
+import { createApp, createInstaller } from "..";
 
 describe("createProvider", () => {
   test("providers can inherit other providers", async (t: TestContext) => {
@@ -23,28 +23,24 @@ describe("createProvider", () => {
       expose: async ({ foo, fooChild }) => {
         t.assert.deepStrictEqual(foo, { msg: "hello" });
         t.assert.deepStrictEqual(fooChild, { msg: "hello 2" });
+        return { msg: foo.msg + " world!" };
+      },
+    });
 
-        return {
-          msg: foo.msg + " world!",
-        };
+    const installer = createInstaller({
+      deps: { bar },
+      install: async ({ fastify, deps }) => {
+        t.assert.ok(fastify.log);
+        t.assert.deepStrictEqual(deps, { bar: { msg: "hello world!" } });
       },
     });
 
     const root = createModule({
       name: "root",
-      deps: {
-        bar,
-      },
-      fastifyInstaller({ fastify, deps }) {
-        t.assert.ok(fastify.log);
-        t.assert.deepStrictEqual(deps, {
-          bar: { msg: "hello world!" },
-        });
-      },
+      installers: [installer],
     });
 
     const app = await createApp({ root });
-
     await app.close();
   });
 
@@ -61,13 +57,9 @@ describe("createProvider", () => {
       expose: async () => ({ x: 2 }),
     });
 
-    const root = createModule({
-      name: "root",
-      deps: {
-        foo,
-        fooChild,
-      },
-      fastifyInstaller({ fastify, deps }) {
+    const installer = createInstaller({
+      deps: { foo, fooChild },
+      install: async ({ fastify, deps }) => {
         t.assert.ok(fastify.log.error);
         t.assert.deepStrictEqual(deps, {
           foo: { x: 1 },
@@ -76,8 +68,12 @@ describe("createProvider", () => {
       },
     });
 
-    const app = await createApp({ root });
+    const root = createModule({
+      name: "root",
+      installers: [installer],
+    });
 
+    const app = await createApp({ root });
     await app.close();
   });
 
@@ -104,41 +100,36 @@ describe("createProvider", () => {
 
     const fooChild = createProvider({
       name: "fooChild",
-      deps: {
-        foo,
-      },
+      deps: { foo },
       expose: async () => ({ x: 1 }),
       onReady: async ({ deps }) => {
         fooReady++;
-        t.assert.deepStrictEqual(deps, {
-          foo: { x: 1 },
-        });
+        t.assert.deepStrictEqual(deps, { foo: { x: 1 } });
       },
       onClose: async ({ deps }) => {
         fooClosed++;
-        t.assert.deepStrictEqual(deps, {
-          foo: { x: 1 },
-        });
+        t.assert.deepStrictEqual(deps, { foo: { x: 1 } });
       },
+    });
+
+    const installer = createInstaller({
+      deps: { fooChild },
+      install: async () => {},
     });
 
     const root = createModule({
       name: "root",
-      deps: {
-        fooChild,
-      },
+      installers: [installer],
     });
 
     t.assert.equal(fooReady, 0);
     t.assert.equal(fooClosed, 0);
 
     const app = await createApp({ root });
-
     t.assert.equal(fooReady, 2);
     t.assert.equal(fooClosed, 0);
 
     await app.close();
-
     t.assert.equal(fooReady, 2);
     t.assert.equal(fooClosed, 2);
   });
@@ -169,15 +160,18 @@ describe("createProvider", () => {
       expose: async () => {},
     });
 
+    const installer = createInstaller({
+      deps: { baz, bar },
+      install: async () => {},
+    });
+
     const root = createModule({
       name: "root",
-      deps: { bar, baz },
+      installers: [installer],
     });
 
     const app = await createApp({ root });
-
     t.assert.strictEqual(exposeCalls, 2);
-
     await app.close();
   });
 
@@ -216,16 +210,20 @@ describe("createProvider", () => {
       expose: async () => {},
     });
 
+    const installer = createInstaller({
+      deps: { baz, taz },
+      install: async () => {},
+    });
+
     const root = createModule({
       name: "root",
-      deps: { baz, taz },
+      installers: [installer],
     });
 
     const app = await createApp({ root });
 
     t.assert.strictEqual(nestedTransientExposeCalls, 2);
     t.assert.strictEqual(transientExposeCalls, 2);
-
     await app.close();
   });
 
@@ -243,18 +241,21 @@ describe("createProvider", () => {
       }),
     });
 
-    const dbModule = createModule({
-      name: "dbModule",
+    const installer = createInstaller({
       deps: { db },
-      fastifyInstaller({ fastify, deps }) {
+      install: async ({ fastify, deps }) => {
         fastify.addHook("onClose", async () => {
           await deps.db.onClose();
         });
       },
     });
 
-    const app = await createApp({ root: dbModule });
+    const dbModule = createModule({
+      name: "dbModule",
+      installers: [installer],
+    });
 
+    const app = await createApp({ root: dbModule });
     await app.close();
 
     t.assert.ok(closed);
@@ -285,15 +286,18 @@ describe("createProvider", () => {
       expose: async () => {},
     });
 
+    const installer = createInstaller({
+      deps: { baz, bar },
+      install: async () => {},
+    });
+
     const root = createModule({
       name: "root",
-      deps: { bar, baz },
+      installers: [installer],
     });
 
     const app = await createApp({ root });
-
     t.assert.strictEqual(exposeCalls, 1);
-
     await app.close();
   });
 
@@ -332,16 +336,19 @@ describe("createProvider", () => {
       expose: async () => {},
     });
 
+    const installer = createInstaller({
+      deps: { baz, taz },
+      install: async () => {},
+    });
+
     const root = createModule({
       name: "root",
-      deps: { baz, taz },
+      installers: [installer],
     });
 
     const app = await createApp({ root });
-
     t.assert.strictEqual(nestedTransientExposeCalls, 1);
     t.assert.strictEqual(singletonExposeCalls, 1);
-
     await app.close();
   });
 
@@ -380,52 +387,43 @@ describe("createProvider", () => {
       expose: async () => {},
     });
 
+    const installer = createInstaller({
+      deps: { baz, taz },
+      install: async () => {},
+    });
+
     const root = createModule({
       name: "root",
-      deps: { baz, taz },
+      installers: [installer],
     });
 
     const app = await createApp({ root });
 
     t.assert.strictEqual(nestedSingletonExposeCalls, 1);
     t.assert.strictEqual(transientExposeCalls, 2);
-
     await app.close();
   });
 
   test("Alias name providers should not be allowed", async (t: TestContext) => {
     t.plan(1);
 
-    const foo = createProvider({
-      name: "foo",
-      expose: () => {
-        return {};
-      },
-    });
-
-    const fooAlias = createProvider({
-      name: "foo",
-      expose: () => {
-        return {};
-      },
-    });
+    const foo = createProvider({ name: "foo", expose: () => ({}) });
+    const fooAlias = createProvider({ name: "foo", expose: () => ({}) });
 
     const bar = createProvider({
       name: "bar",
-      deps: {
-        foo,
-        fooAlias,
-      },
-      expose: () => {
-        return {};
-      },
+      deps: { foo, fooAlias },
+      expose: () => ({}),
+    });
+
+    const installer = createInstaller({
+      deps: { bar },
+      install: async () => {},
     });
 
     const root = createModule({
       name: "root",
-      deps: {
-        bar,
-      },
+      installers: [installer],
     });
 
     await t.assert.rejects(
@@ -453,18 +451,21 @@ describe("createProvider", () => {
       expose: async () => ({ url: "fake" }),
     });
 
-    // create a double with fake db
     const repoDouble = repo.withProviders((deps) => ({
       ...deps,
       db: fakeDb,
     }));
 
-    const root = createModule({
-      name: "root",
+    const installer = createInstaller({
       deps: { repoDouble },
-      fastifyInstaller({ deps }) {
+      install: async ({ deps }) => {
         t.assert.strictEqual(deps.repoDouble, "fake");
       },
+    });
+
+    const root = createModule({
+      name: "root",
+      installers: [installer],
     });
 
     const app = await createApp({ root });
@@ -502,7 +503,6 @@ describe("createProvider", () => {
           name: "badTransientError",
           lifecycle: "transient",
           expose: async () => ({}),
-          // once onError is supported in ProviderDef:
           onError: async () => {},
         }),
       /Provider "badTransientError" is declared as transient but defines a "onError" hook/i,

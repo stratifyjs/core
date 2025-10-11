@@ -1,7 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
 import type { Container } from "../container/container";
-import { deepClone } from "../utils/deep-clone";
 import {
   ModuleAny,
   ModuleDef,
@@ -22,26 +21,15 @@ export function getModuleId(mod: ModuleAny): string {
 }
 
 export function createModule<
-  const Providers extends ProvidersMap,
   const SubModules extends SubModulesMap,
->(def: ModuleOptions<Providers, SubModules>): ModuleDef<Providers, SubModules> {
+>(def: ModuleOptions<SubModules>): ModuleDef<SubModules> {
   const self = {
     name: def.name,
-    deps: (def.deps ?? {}) as Providers,
     subModules: (def.subModules ?? []) as SubModules,
     encapsulate: def.encapsulate ?? true,
-    fastifyInstaller: def.fastifyInstaller,
+    installers: def.installers,
     controllers: def.controllers,
     hooks: def.hooks,
-    withProviders(
-      updater: (deps: Providers) => Providers,
-    ): ModuleDef<Providers, SubModules> {
-      return createModule<Providers, SubModules>({
-        ...self,
-        deps: updater(deepClone(self.deps)),
-        subModules: deepClone(self.subModules),
-      });
-    },
   };
 
   Object.defineProperty(self, kModuleId, {
@@ -60,18 +48,19 @@ export async function registerModule(
   const plugin = async (instance: FastifyInstance) => {
     if (Array.isArray(mod.hooks)) {
       for (const hookConfig of mod.hooks) {
-        await hookConfig.registerHooks(instance, container, mod.name);
+        await hookConfig.register(instance, container, mod.name);
       }
     }
 
-    const localValues = await resolveProviderMap(container, mod.deps);
-    if (mod.fastifyInstaller) {
-      await mod.fastifyInstaller({ fastify: instance, deps: localValues });
+    if (Array.isArray(mod.installers)) {
+      for (const config of mod.installers) {
+        await config.register(instance, container, mod.name);
+      }
     }
 
     if (Array.isArray(mod.controllers)) {
       for (const config of mod.controllers) {
-        await config.registerRoutes(instance, container, mod.name);
+        await config.register(instance, container, mod.name);
       }
     }
 

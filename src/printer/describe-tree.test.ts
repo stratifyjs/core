@@ -1,17 +1,24 @@
 import { describe, test, TestContext } from "node:test";
-import { createProvider } from "../providers";
-import { createApp, createModule } from "..";
+import {
+  createProvider,
+  createModule,
+  createApp,
+  createController,
+  createInstaller,
+  createHooks,
+  createAdapter,
+} from "..";
 
 describe("describeTree", () => {
-  test("root with child, grandchild, and sibling modules + providers", async (t: TestContext) => {
+  test("renders module hierarchy with installers, controllers, hooks and deps", async (t: TestContext) => {
     t.plan(1);
 
-    const grandChildProvider = createProvider({
+    const grandChildProv = createProvider({
       name: "grandChildProv",
       expose: () => ({ x: 1 }),
     });
 
-    const siblingProvider = createProvider({
+    const siblingProv = createProvider({
       name: "siblingProv",
       lifecycle: "transient",
       expose: () => ({ y: 2 }),
@@ -19,13 +26,46 @@ describe("describeTree", () => {
 
     const siblingDependent = createProvider({
       name: "siblingDependent",
-      deps: { siblingProvider },
-      expose: ({ siblingProvider }) => ({ z: siblingProvider.y + 1 }),
+      deps: { siblingProv },
+      expose: ({ siblingProv }) => ({ z: siblingProv.y + 1 }),
+    });
+
+    const siblingAdapter = createAdapter({
+      name: "siblingAdapter",
+      expose: async () => ({
+        info: '',
+      }),
+    });
+
+    const hooksA = createHooks({
+      type: "app",
+      name: 'a',
+      deps: { grandChildProv },
+      adaps: { siblingAdapter },
+      build: async () => {},
+    });
+
+    const installerA = createInstaller({
+      name: 'a',
+      deps: { siblingProv },
+      install: async () => {},
+    });
+
+    const installerB = createInstaller({
+      name: 'b',
+      install: async () => {},
+    });
+
+    const controllerA = createController({
+      deps: { siblingDependent },
+      adaps: { siblingAdapter },
+      name: 'a',
+      build: async () => {},
     });
 
     const grandChild = createModule({
       name: "grandchild",
-      deps: { grandChildProvider },
+      hooks: [hooksA],
     });
 
     const child = createModule({
@@ -36,7 +76,8 @@ describe("describeTree", () => {
     const sibling = createModule({
       name: "sibling",
       encapsulate: false,
-      deps: { siblingProvider, siblingDependent },
+      installers: [installerA, installerB],
+      controllers: [controllerA],
     });
 
     const root = createModule({
@@ -50,15 +91,21 @@ describe("describeTree", () => {
     const expected = String.raw`🌳 mod root@m\d+ \(encapsulate=true\)
   📦 mod child@m\d+ \(encapsulate=true\)
     📦 mod grandchild@m\d+ \(encapsulate=true\)
-      🔧 prov grandChildProv@p\d+ \[singleton\]
+      🪝 hooks a
+        🔌 adp siblingAdapter
+        🔧 prov grandChildProv@p\d+ \[singleton\]
   📦 mod sibling@m\d+ \(encapsulate=false\)
-    🔧 prov siblingProv@p\d+ \[transient\]
-    🔧 prov siblingDependent@p\d+ \[singleton\]
+    ⚙️ installer a
       🔧 prov siblingProv@p\d+ \[transient\]
+    ⚙️ installer b
+    🧭 controller a
+      🔌 adp siblingAdapter
+      🔧 prov siblingDependent@p\d+ \[singleton\]
+        🔧 prov siblingProv@p\d+ \[transient\]
 `;
-
-    t.assert.match(tree + "\n", new RegExp(expected));
-
+    // eslint-disable-next-line no-control-regex
+    const stripAnsi = (s: string) => s.replace(/\x1B\[[0-9;]*m/g, "");
+    t.assert.match(stripAnsi(tree) + "\n", new RegExp(expected));
     await app.close();
   });
 });
