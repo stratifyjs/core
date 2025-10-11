@@ -8,6 +8,10 @@ import {
   RouteOptions,
 } from "fastify";
 import { ApplicationHook, LifecycleHook } from "fastify/types/hooks";
+import { HttpHooksBuilder } from "./http-hooks-builder";
+import { ExposeDeps, ProvidersMap } from "../providers";
+import { Container } from "../container/container";
+import { AppHooksBuilder } from "./application-hooks-builder";
 
 // --- HTTP  hooks ---
 export type OnRequestHandler = (
@@ -73,6 +77,28 @@ export type HttpHookHandlers<K extends keyof HttpHookMap> = HttpHookMap[K];
 export type HttpHookHandler<K extends keyof HttpHookMap> =
   HttpHookHandlers<K>[number];
 
+type HttpHooksBuilderCallback<Providers extends ProvidersMap> = (ctx: {
+  builder: HttpHooksBuilder;
+  deps: ExposeDeps<Providers>;
+}) => unknown | Promise<unknown>;
+
+export interface HttpHooksOptions<Providers extends ProvidersMap> {
+  readonly type: "http";
+  readonly deps: Providers;
+  readonly builder: HttpHooksBuilderCallback<Providers>;
+}
+
+export interface HttpHooksConfig<Providers extends ProvidersMap> {
+  readonly type: "http";
+  readonly deps: Providers;
+  readonly builder: HttpHooksBuilderCallback<Providers>;
+  registerHooks(
+    fastify: FastifyInstance,
+    container: Container,
+    moduleName: string,
+  ): Promise<void>;
+}
+
 // --- Application hooks ---
 
 export type OnReadyHandler =
@@ -102,3 +128,25 @@ export type AppHookMap = {
   onRegister: OnRegisterHandler[];
   preClose: OnPreCloseHandler[];
 };
+
+type ApplicationHooksBuilderCallback<Providers extends ProvidersMap> = (ctx: {
+  builder: AppHooksBuilder;
+  deps: ExposeDeps<Providers>;
+}) => unknown | Promise<unknown>;
+
+export interface AppHooksOptions<Providers extends ProvidersMap> {
+  readonly type: "app";
+  readonly deps: Providers;
+  readonly builder: ApplicationHooksBuilderCallback<Providers>;
+}
+
+export interface AppHooksConfig<Providers extends ProvidersMap> {
+  readonly type: "app";
+  readonly deps: Providers;
+  readonly builder: ApplicationHooksBuilderCallback<Providers>;
+  registerHooks(
+    fastify: FastifyInstance,
+    container: Container,
+    moduleName: string,
+  ): Promise<void>;
+}

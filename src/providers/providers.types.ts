@@ -73,3 +73,9 @@ export type ProviderContract<Value> = ProviderDef<any, Value>;
 export type InferProviderContract<P> =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   P extends ProviderDef<any, infer Value> ? ProviderContract<Value> : never;
+
+export type ProvidersMap = Record<string, ProviderAny>;
+
+export type ExposeDeps<Providers extends ProvidersMap> = {
+  [K in keyof Providers]: Awaited<ReturnType<Providers[K]["expose"]>>;
+};

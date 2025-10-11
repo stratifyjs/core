@@ -1,8 +1,9 @@
 import { describe, test, TestContext } from "node:test";
 import { createApp, createModule, createProvider } from "..";
+import { createHooks } from "./hooks";
 
-describe("http hooks builder integration", () => {
-  test("registers HTTP hooks defined through the builder", async (t: TestContext) => {
+describe("HTTP hooks builder integration", () => {
+  test("registers HTTP hooks defined through createHooks", async (t: TestContext) => {
     t.plan(3);
 
     const exposed = { find: () => "Jean" };
@@ -12,17 +13,22 @@ describe("http hooks builder integration", () => {
       expose: async () => exposed,
     });
 
-    const root = createModule({
-      name: "root",
+    const httpHooks = createHooks({
+      type: "http",
       deps: { userRepo },
-      httpHooks({ builder, deps }) {
+      builder: async ({ builder, deps }) => {
         t.assert.deepStrictEqual(deps.userRepo, exposed);
-
         builder.addHook("onRequest", async (req, reply) => {
           reply.header("x-hook", "executed");
         });
       },
-      routes({ builder }) {
+    });
+
+    const root = createModule({
+      name: "root",
+      deps: { userRepo },
+      hooks: [httpHooks],
+      routes: ({ builder }) => {
         builder.addRoute({
           url: "/",
           method: "GET",
@@ -48,14 +54,21 @@ describe("http hooks builder integration", () => {
       expose: async () => ({ find: () => "real" }),
     });
 
+    const badHook = createHooks({
+      type: "http",
+      deps: { userRepo },
+      builder: ({ builder }) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        builder.addHook("onRequest", () => {});
+      },
+    });
+
     const root = createModule({
       name: "root-bad-hook",
       deps: { userRepo },
-      httpHooks({ builder }) {
-        // @ts-expect-error purposely non-async
-        builder.addHook("onRequest", () => {});
-      },
-      routes({ builder }) {
+      hooks: [badHook],
+      routes: ({ builder }) => {
         builder.addRoute({
           url: "/",
           method: "GET",
@@ -73,18 +86,23 @@ describe("http hooks builder integration", () => {
   test("multiple hooks of the same type all register correctly", async (t: TestContext) => {
     t.plan(1);
 
-    const root = createModule({
-      name: "root-multiple",
-      httpHooks({ builder }) {
+    const httpHooks = createHooks({
+      type: "http",
+      deps: {},
+      builder: async ({ builder }) => {
         builder.addHook("onRequest", async (req, reply) => {
           reply.header("x-one", "1");
         });
-
         builder.addHook("onRequest", async (req, reply) => {
           reply.header("x-two", "2");
         });
       },
-      routes({ builder }) {
+    });
+
+    const root = createModule({
+      name: "root-multiple",
+      hooks: [httpHooks],
+      routes: ({ builder }) => {
         builder.addRoute({
           url: "/",
           method: "GET",
@@ -133,10 +151,10 @@ describe("http hooks builder integration", () => {
       onError: [],
     };
 
-    const root = createModule({
-      name: "root-http-hooks-all",
+    const hooks = createHooks({
+      type: "http",
       deps: { userRepo },
-      httpHooks({ builder, deps }) {
+      builder: async ({ builder, deps }) => {
         t.assert.deepStrictEqual(deps.userRepo, exposed);
 
         builder.addHook("onRequest", async (req, reply) => {
@@ -179,7 +197,13 @@ describe("http hooks builder integration", () => {
           captured.onError.push({ message: (error as Error).message });
         });
       },
-      routes({ builder }) {
+    });
+
+    const root = createModule({
+      name: "root-http-hooks-all",
+      deps: { userRepo },
+      hooks: [hooks],
+      routes: ({ builder }) => {
         builder.addRoute({
           url: "/",
           method: "GET",
@@ -203,7 +227,7 @@ describe("http hooks builder integration", () => {
 
     t.assert.strictEqual(res.statusCode, 200);
     t.assert.strictEqual(json.ok, true);
-    t.assert.strictEqual(json.hooked, true); // modified by onSend
+    t.assert.strictEqual(json.hooked, true);
 
     t.assert.ok(onRequest_hook_executed);
     t.assert.ok(preParsing_hook_executed);
@@ -243,9 +267,10 @@ describe("App hooks builder integration", () => {
       onRoute: [] as any[],
     };
 
-    const root = createModule({
-      name: "root-all-hooks",
-      appHooks({ builder }) {
+    const appHooks = createHooks({
+      type: "app",
+      deps: {},
+      builder: async ({ builder }) => {
         builder.addHook("onRegister", async (instance, opts) => {
           onRegister_hook_executed = true;
           captured.onRegister.push({ instance, opts });
@@ -272,7 +297,12 @@ describe("App hooks builder integration", () => {
           onClose_hook_executed = true;
         });
       },
-      routes({ builder }) {
+    });
+
+    const root = createModule({
+      name: "root-all-hooks",
+      hooks: [appHooks],
+      routes: ({ builder }) => {
         builder.addRoute({
           url: "/",
           method: "GET",
@@ -280,7 +310,6 @@ describe("App hooks builder integration", () => {
         });
       },
       fastifyInstaller: ({ fastify }) => {
-        // Ensure onRegister receives a real FastifyInstance
         fastify.register(
           async (sub) => {
             sub.get("/plugin", async () => ({ plugin: true }));

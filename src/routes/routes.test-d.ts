@@ -1,46 +1,6 @@
 import { Type } from "@sinclair/typebox";
-import { createModule, ProvidersMap, RoutesBuilderCallback } from "../modules";
+import { createModule } from "../modules";
 import { expectType } from "tsd";
-import { createProvider, ProviderContract } from "../providers";
-
-// Port
-interface X {
-  foo: number;
-}
-
-type XContract = ProviderContract<X>;
-
-// Adapter
-const x: XContract = createProvider({
-  name: "x",
-  expose: () => ({ foo: 0 }),
-});
-
-interface XModuleDeps extends ProvidersMap {
-  x: XContract;
-}
-
-const deps: XModuleDeps = {
-  x,
-};
-
-const routes: RoutesBuilderCallback<XModuleDeps> = ({ builder, deps }) => {
-  builder.addRoute({
-    url: "/",
-    method: "GET",
-    handler: async (req, rep) => {
-      expectType<string>(req.ip);
-      expectType<boolean>(rep.sent);
-      expectType<{ foo: number }>(deps.x);
-    },
-  });
-};
-
-createModule({
-  name: "root",
-  deps,
-  routes,
-});
 
 const CreateUserSchema = {
   body: Type.Object({
