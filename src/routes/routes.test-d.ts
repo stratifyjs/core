@@ -1,10 +1,5 @@
 import { Type } from "@sinclair/typebox";
-import {
-  createModule,
-  HttpHooksBuilderCallback,
-  ProvidersMap,
-  RoutesBuilderCallback,
-} from "../modules";
+import { createModule, ProvidersMap, RoutesBuilderCallback } from "../modules";
 import { expectType } from "tsd";
 import { createProvider, ProviderContract } from "../providers";
 
@@ -41,22 +36,10 @@ const routes: RoutesBuilderCallback<XModuleDeps> = ({ builder, deps }) => {
   });
 };
 
-const httpHooks: HttpHooksBuilderCallback<XModuleDeps> = ({
-  builder,
-  deps,
-}) => {
-  builder.addHook("onRequest", async (req, rep) => {
-    expectType<string>(req.ip);
-    expectType<boolean>(rep.sent);
-    expectType<{ foo: number }>(deps.x);
-  });
-};
-
 createModule({
   name: "root",
   deps,
   routes,
-  httpHooks,
 });
 
 const CreateUserSchema = {

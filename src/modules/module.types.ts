@@ -1,7 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import type { ProviderAny } from "../providers";
 import { RoutesBuilder } from "../routes/routes-builder";
-import { HttpHooksBuilder } from "../hooks/hooks-builder";
+import { HttpHooksBuilder } from "../hooks/http-hooks-builder";
+import { AppHooksBuilder } from "../hooks";
 
 type ExposeDeps<Providers extends ProvidersMap> = {
   [K in keyof Providers]: Awaited<ReturnType<Providers[K]["expose"]>>;
@@ -24,6 +25,12 @@ export type HttpHooksBuilderCallback<Providers extends ProvidersMap> = (ctx: {
   deps: ExposeDeps<Providers>;
 }) => unknown | Promise<unknown>;
 
+export type ApplicationHooksBuilderCallback<Providers extends ProvidersMap> =
+  (ctx: {
+    builder: AppHooksBuilder;
+    deps: ExposeDeps<Providers>;
+  }) => unknown | Promise<unknown>;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ModuleAny = ModuleDef<any, any>;
 export type ProvidersMap = Record<string, ProviderAny>;
@@ -40,6 +47,7 @@ export interface ModuleDef<
   fastifyInstaller?: AccessFastifyCallback<Providers>;
   routes?: RoutesBuilderCallback<Providers>;
   httpHooks?: HttpHooksBuilderCallback<Providers>;
+  appHooks?: ApplicationHooksBuilderCallback<Providers>;
   withProviders(
     updater: (deps: Providers) => Providers,
   ): ModuleDef<Providers, SubModules>;
@@ -57,4 +65,5 @@ export type ModuleOptions<
   fastifyInstaller?: AccessFastifyCallback<Providers>;
   routes?: RoutesBuilderCallback<Providers>;
   httpHooks?: HttpHooksBuilderCallback<Providers>;
+  appHooks?: ApplicationHooksBuilderCallback<Providers>;
 };

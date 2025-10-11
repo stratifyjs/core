@@ -1,7 +1,7 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
 import type { HttpHookName } from "./hooks.types";
-import { HttpHooksBuilder } from "./hooks-builder";
+import { HttpHooksBuilder } from "./http-hooks-builder";
 
 const HOOKS: HttpHookName[] = [
   "onRequest",

@@ -10,7 +10,8 @@ import {
   SubModulesMap,
 } from "./module.types";
 import { RoutesBuilder } from "../routes/routes-builder";
-import { HttpHooksBuilder } from "../hooks/hooks-builder";
+import { HttpHooksBuilder } from "../hooks/http-hooks-builder";
+import { AppHooksBuilder } from "../hooks";
 
 const kModuleId = Symbol("fastify-dependency-injection:moduleId");
 let __seq = 0;
@@ -35,6 +36,7 @@ export function createModule<
     fastifyInstaller: def.fastifyInstaller,
     routes: def.routes,
     httpHooks: def.httpHooks,
+    appHooks: def.appHooks,
     withProviders(
       updater: (deps: Providers) => Providers,
     ): ModuleDef<Providers, SubModules> {
@@ -61,6 +63,18 @@ export async function registerModule(
 ): Promise<void> {
   const plugin = async (instance: FastifyInstance) => {
     const localValues = await resolveProviderMap(container, mod.deps);
+    if (mod.appHooks) {
+      const builder = new AppHooksBuilder(mod.name);
+      await mod.appHooks({ builder, deps: localValues });
+      builder.register(instance);
+    }
+
+    if (mod.httpHooks) {
+      const builder = new HttpHooksBuilder(mod.name);
+      await mod.httpHooks({ builder, deps: localValues });
+      builder.register(instance);
+    }
+
     if (mod.fastifyInstaller) {
       await mod.fastifyInstaller({ fastify: instance, deps: localValues });
     }
@@ -68,12 +82,6 @@ export async function registerModule(
     if (mod.routes) {
       const builder = new RoutesBuilder();
       await mod.routes({ builder, deps: localValues });
-      builder.register(instance);
-    }
-
-    if (mod.httpHooks) {
-      const builder = new HttpHooksBuilder(mod.name);
-      await mod.httpHooks({ builder, deps: localValues });
       builder.register(instance);
     }
 

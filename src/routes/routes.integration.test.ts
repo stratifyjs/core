@@ -8,7 +8,6 @@ describe("routes builder integration", () => {
     t.plan(2);
 
     const exposed = { find: () => "Jean" };
-
     const userRepo = createProvider({
       name: "userRepo",
       expose: async () => exposed,
