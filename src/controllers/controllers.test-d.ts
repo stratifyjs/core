@@ -1,6 +1,7 @@
 import { Type } from "@sinclair/typebox";
 import { createModule } from "../modules";
 import { expectType } from "tsd";
+import { createController } from "./controller";
 
 const CreateUserSchema = {
   body: Type.Object({
@@ -17,9 +18,8 @@ const CreateUserSchema = {
   }),
 };
 
-createModule({
-  name: "root",
-  routes({ builder }) {
+const controller = createController({
+  build({ builder }) {
     builder.addRoute({
       url: "/",
       method: "GET",
@@ -35,4 +35,9 @@ createModule({
       },
     });
   },
+});
+
+createModule({
+  name: "root",
+  controllers: [controller],
 });

@@ -1,7 +1,7 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
 import { RoutesBuilder } from "./routes-builder";
-import { StratifyRouteOptions } from "./routes.types";
+import { StratifyRouteOptions } from "./controllers.types";
 
 describe("RoutesBuilder", () => {
   test("should add and retrieve routes", () => {

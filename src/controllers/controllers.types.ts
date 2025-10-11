@@ -1,4 +1,9 @@
-import { FastifyReply, FastifyRequest, RouteOptions } from "fastify";
+import {
+  FastifyInstance,
+  FastifyReply,
+  FastifyRequest,
+  RouteOptions,
+} from "fastify";
 import {
   OnErrorHookHandler,
   OnPreHandlerHandler,
@@ -12,6 +17,9 @@ import {
   OnTimeoutHandler,
 } from "../hooks";
 import { Static, TSchema } from "@sinclair/typebox";
+import { ExposeDeps, ProvidersMap } from "../providers";
+import { RoutesBuilder } from "./routes-builder";
+import { Container } from "../container/container";
 
 type ErrorHandler = (
   error: unknown,
@@ -69,3 +77,25 @@ export type ExtractRouteGenerics<S extends Record<string, unknown>> = {
   Params: S extends { params: TSchema } ? Static<S["params"]> : unknown;
   Headers: S extends { headers: TSchema } ? Static<S["headers"]> : unknown;
 };
+
+export interface ControllerOptions<Providers extends ProvidersMap> {
+  deps?: Providers;
+  build: ControllerBuilderCallback<Providers>;
+}
+
+export type ControllerBuilderCallback<
+  Providers extends ProvidersMap = ProvidersMap,
+> = (ctx: {
+  builder: RoutesBuilder;
+  deps: ExposeDeps<Providers>;
+}) => unknown | Promise<unknown>;
+
+export interface ControllerConfig<Providers extends ProvidersMap> {
+  deps: Providers;
+  build: ControllerBuilderCallback<Providers>;
+  registerRoutes(
+    fastify: FastifyInstance,
+    container: Container,
+    moduleName: string,
+  ): Promise<void>;
+}

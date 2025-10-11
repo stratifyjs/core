@@ -3,7 +3,7 @@ import {
   ensureAsyncCallback,
   ensureAsyncCallbacks,
 } from "../utils/ensure-async-callback";
-import { StratifyRouteOptions } from "./routes.types";
+import { StratifyRouteOptions } from "./controllers.types";
 
 export class RoutesBuilder {
   private readonly routes = new Set<

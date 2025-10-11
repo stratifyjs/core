@@ -2,6 +2,7 @@ import test, { describe, TestContext } from "node:test";
 import { createProvider } from "../providers";
 import { createModule } from "../modules";
 import { createApp } from "..";
+import { createController } from "./controller";
 
 describe("routes builder integration", () => {
   test("registers route defined through the builder", async (t: TestContext) => {
@@ -13,10 +14,9 @@ describe("routes builder integration", () => {
       expose: async () => exposed,
     });
 
-    const root = createModule({
-      name: "root",
-      deps: { userRepo },
-      routes({ builder, deps }) {
+    const controller = createController({
+      deps: {userRepo},
+      build({ builder, deps }) {
         t.assert.deepEqual(deps.userRepo, exposed);
 
         builder.addRoute({
@@ -27,6 +27,12 @@ describe("routes builder integration", () => {
           }),
         });
       },
+    });
+
+    const root = createModule({
+      name: "root",
+      deps: { userRepo },
+      controllers: [controller],
     });
 
     const app = await createApp({ root });
@@ -45,10 +51,8 @@ describe("routes builder integration", () => {
       expose: async () => ({ find: () => "real" }),
     });
 
-    const root = createModule({
-      name: "root-bad",
-      deps: { userRepo },
-      routes({ builder }) {
+    const controller = createController({
+      build({ builder }) {
         builder.addRoute({
           url: "/bad",
           method: "GET",
@@ -56,6 +60,12 @@ describe("routes builder integration", () => {
           handler: () => ({ user: "oops" }),
         });
       },
+    });
+
+    const root = createModule({
+      name: "root-bad",
+      deps: { userRepo },
+      controllers: [controller],
     });
 
     await t.assert.rejects(
@@ -72,10 +82,8 @@ describe("routes builder integration", () => {
       expose: async () => ({ find: () => "real" }),
     });
 
-    const root = createModule({
-      name: "root-bad",
-      deps: { userRepo },
-      routes({ builder }) {
+    const controller = createController({
+      build({ builder }) {
         builder.addRoute({
           url: "/bad",
           method: "GET",
@@ -84,6 +92,12 @@ describe("routes builder integration", () => {
           handler: async () => ({ user: "Jean" }),
         });
       },
+    });
+
+    const root = createModule({
+      name: "root-bad",
+      deps: { userRepo },
+      controllers: [controller]
     });
 
     await t.assert.rejects(

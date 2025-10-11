@@ -8,7 +8,6 @@ import {
   ModuleOptions,
   SubModulesMap,
 } from "./module.types";
-import { RoutesBuilder } from "../routes/routes-builder";
 import { ProvidersMap } from "../providers";
 
 const kModuleId = Symbol("fastify-dependency-injection:moduleId");
@@ -32,7 +31,7 @@ export function createModule<
     subModules: (def.subModules ?? []) as SubModules,
     encapsulate: def.encapsulate ?? true,
     fastifyInstaller: def.fastifyInstaller,
-    routes: def.routes,
+    controllers: def.controllers,
     hooks: def.hooks,
     withProviders(
       updater: (deps: Providers) => Providers,
@@ -70,10 +69,10 @@ export async function registerModule(
       await mod.fastifyInstaller({ fastify: instance, deps: localValues });
     }
 
-    if (mod.routes) {
-      const builder = new RoutesBuilder();
-      await mod.routes({ builder, deps: localValues });
-      builder.register(instance);
+    if (Array.isArray(mod.controllers)) {
+      for (const config of mod.controllers) {
+        await config.registerRoutes(instance, container, mod.name);
+      }
     }
 
     for (const sub of mod.subModules) {

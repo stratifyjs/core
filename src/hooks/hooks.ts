@@ -11,15 +11,15 @@ import { HttpHooksBuilder } from "./http-hooks-builder";
 import { AppHooksBuilder } from "./application-hooks-builder";
 import { resolveProviderMap } from "../modules";
 
-export function createHooks<Providers extends ProvidersMap>(
+export function createHooks<Providers extends ProvidersMap = ProvidersMap>(
   options: HttpHooksOptions<Providers>,
 ): HttpHooksConfig<Providers>;
 
-export function createHooks<Providers extends ProvidersMap>(
+export function createHooks<Providers extends ProvidersMap = ProvidersMap>(
   options: AppHooksOptions<Providers>,
 ): AppHooksConfig<Providers>;
 
-export function createHooks<Providers extends ProvidersMap>(
+export function createHooks<Providers extends ProvidersMap = ProvidersMap>(
   options: HttpHooksOptions<Providers> | AppHooksOptions<Providers>,
 ) {
   const { type, deps = {}, build } = options;

@@ -6,7 +6,7 @@ import Fastify, {
 export * from "./providers";
 export * from "./modules";
 export * from "./hooks";
-export * from "./routes";
+export * from "./controllers";
 
 import { getProviderId, resolveDeps, type ProviderAny } from "./providers";
 import { Container } from "./container/container";

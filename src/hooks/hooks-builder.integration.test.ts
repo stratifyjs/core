@@ -1,6 +1,7 @@
 import { describe, test, TestContext } from "node:test";
 import { createApp, createModule, createProvider } from "..";
 import { createHooks } from "./hooks";
+import { createController } from "../controllers/controller";
 
 describe("HTTP hooks builder integration", () => {
   test("registers HTTP hooks defined through createHooks", async (t: TestContext) => {
@@ -24,17 +25,21 @@ describe("HTTP hooks builder integration", () => {
       },
     });
 
-    const root = createModule({
-      name: "root",
-      deps: { userRepo },
-      hooks: [httpHooks],
-      routes: ({ builder }) => {
+    const controller = createController({
+      build: ({ builder }) => {
         builder.addRoute({
           url: "/",
           method: "GET",
           handler: async () => ({ ok: true }),
         });
       },
+    });
+
+    const root = createModule({
+      name: "root",
+      deps: { userRepo },
+      hooks: [httpHooks],
+      controllers: [controller],
     });
 
     const app = await createApp({ root });
@@ -64,17 +69,21 @@ describe("HTTP hooks builder integration", () => {
       },
     });
 
-    const root = createModule({
-      name: "root-bad-hook",
-      deps: { userRepo },
-      hooks: [badHook],
-      routes: ({ builder }) => {
+    const controller = createController({
+      build: ({ builder }) => {
         builder.addRoute({
           url: "/",
           method: "GET",
           handler: async () => ({ ok: true }),
         });
       },
+    });
+
+    const root = createModule({
+      name: "root-bad-hook",
+      deps: { userRepo },
+      hooks: [badHook],
+      controllers: [controller],
     });
 
     await t.assert.rejects(
@@ -99,16 +108,20 @@ describe("HTTP hooks builder integration", () => {
       },
     });
 
-    const root = createModule({
-      name: "root-multiple",
-      hooks: [httpHooks],
-      routes: ({ builder }) => {
+    const controller = createController({
+      build: ({ builder }) => {
         builder.addRoute({
           url: "/",
           method: "GET",
           handler: async () => ({ ok: true }),
         });
       },
+    });
+
+    const root = createModule({
+      name: "root-multiple",
+      hooks: [httpHooks],
+      controllers: [controller],
     });
 
     const app = await createApp({ root });
@@ -199,11 +212,8 @@ describe("HTTP hooks builder integration", () => {
       },
     });
 
-    const root = createModule({
-      name: "root-http-hooks-all",
-      deps: { userRepo },
-      hooks: [hooks],
-      routes: ({ builder }) => {
+    const controller = createController({
+      build: ({ builder }) => {
         builder.addRoute({
           url: "/",
           method: "GET",
@@ -218,6 +228,13 @@ describe("HTTP hooks builder integration", () => {
           },
         });
       },
+    });
+
+    const root = createModule({
+      name: "root-http-hooks-all",
+      deps: { userRepo },
+      hooks: [hooks],
+      controllers: [controller],
     });
 
     const app = await createApp({ root });
@@ -299,16 +316,20 @@ describe("App hooks builder integration", () => {
       },
     });
 
-    const root = createModule({
-      name: "root-all-hooks",
-      hooks: [appHooks],
-      routes: ({ builder }) => {
+    const controller = createController({
+      build: ({ builder }) => {
         builder.addRoute({
           url: "/",
           method: "GET",
           handler: async () => ({ ok: true }),
         });
       },
+    });
+
+    const root = createModule({
+      name: "root-all-hooks",
+      hooks: [appHooks],
+      controllers: [controller],
       fastifyInstaller: ({ fastify }) => {
         fastify.register(
           async (sub) => {
