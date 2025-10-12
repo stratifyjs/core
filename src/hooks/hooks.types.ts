@@ -12,7 +12,7 @@ import { HttpHooksBuilder } from "./http-hooks-builder";
 import { ExposeDeps, ProvidersMap } from "../providers";
 import { Container } from "../container/container";
 import { AppHooksBuilder } from "./application-hooks-builder";
-import { AdapterMap, AdapterValues } from "../fastify";
+import { AdapterCache, AdapterMap, AdapterValues } from "../fastify";
 
 // --- HTTP  hooks ---
 export type OnRequestHandler = (
@@ -177,5 +177,6 @@ export interface AppHooksConfig<
     fastify: FastifyInstance,
     container: Container,
     moduleName: string,
+    cache: AdapterCache,
   ): Promise<void>;
 }

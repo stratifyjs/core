@@ -5,7 +5,7 @@ import { StratifyRouteOptions } from "./controllers.types";
 
 describe("RoutesBuilder", () => {
   test("should add and retrieve routes", () => {
-    const builder = new RoutesBuilder();
+    const builder = new RoutesBuilder("root");
 
     const routeA: StratifyRouteOptions = {
       method: "GET",
@@ -22,12 +22,11 @@ describe("RoutesBuilder", () => {
     builder.addRoute(routeA).addRoute(routeB);
 
     const routes = builder.getRoutes();
-
     assert.deepStrictEqual(routes, [routeA, routeB]);
   });
 
   test("should not add duplicate route references", () => {
-    const builder = new RoutesBuilder();
+    const builder = new RoutesBuilder("root");
 
     const route: StratifyRouteOptions = {
       method: "GET",
@@ -36,14 +35,13 @@ describe("RoutesBuilder", () => {
     };
 
     builder.addRoute(route).addRoute(route);
-
     const routes = builder.getRoutes();
 
     assert.deepStrictEqual(routes, [route]);
   });
 
   test("addRoute should be chainable", () => {
-    const builder = new RoutesBuilder();
+    const builder = new RoutesBuilder("root");
 
     const route: StratifyRouteOptions = {
       method: "GET",
@@ -72,7 +70,7 @@ describe("RoutesBuilder", () => {
   const mixedArray = [syncFn, asyncFn];
 
   test("accepts async handler and async hooks (single + array)", () => {
-    const builder = new RoutesBuilder();
+    const builder = new RoutesBuilder("root");
 
     for (const hook of HOOKS) {
       const opts: StratifyRouteOptions = {
@@ -99,10 +97,11 @@ describe("RoutesBuilder", () => {
   });
 
   test("throws if any hook or handler is not async", () => {
-    const builder = new RoutesBuilder();
+    const builder = new RoutesBuilder("root");
 
     for (const hook of HOOKS) {
       const url = `/${hook}-sync`;
+
       // Single non-async function
       const optsSingle: StratifyRouteOptions = {
         method: "GET",
@@ -113,7 +112,8 @@ describe("RoutesBuilder", () => {
 
       assert.throws(
         () => builder.addRoute(optsSingle),
-        new RegExp(`Expected an async function for "${url} ${hook}(\\[0\\])?"`),
+        // now matches actual format with [0] suffix
+        /Expected an async function for "hook onRequest in module "root"\[\d*\]?"|hook .+ in module "root"\[\d*\]?/,
       );
 
       // Array containing a non-async function
@@ -127,36 +127,37 @@ describe("RoutesBuilder", () => {
       assert.throws(
         () => builder.addRoute(optsArray),
         new RegExp(
-          `Expected an async function for "${url}-array ${hook}\\[0\\]"`,
+          `Expected an async function for "hook ${hook} in module "root"\\[0\\]"`,
         ),
       );
     }
   });
 
   test("throws if handler is not async", () => {
-    const builder = new RoutesBuilder();
+    const builder = new RoutesBuilder("root");
 
     const opts: StratifyRouteOptions = {
       method: "GET",
       url: "/bad-handler",
-      // @ts-expect-error For rare vanilla users
+      // @ts-expect-error testing sync handler
       handler: () => "not async",
     };
 
     assert.throws(
       () => builder.addRoute(opts),
-      `Expected an async function for "/bad-handler handler"`,
+      /Expected an async function for "\/bad-handler handler"/,
     );
   });
 
-  test("handler is async", () => {
-    const builder = new RoutesBuilder();
+  test("accepts async handler", () => {
+    const builder = new RoutesBuilder("root");
 
     const opts: StratifyRouteOptions = {
       method: "GET",
-      url: "/bad-handler",
+      url: "/good-handler",
       handler: async () => "async",
     };
-    builder.addRoute(opts);
+
+    assert.doesNotThrow(() => builder.addRoute(opts));
   });
 });

@@ -50,7 +50,7 @@ await app.listen({ port: 3000 });
 ## 3) Providers (DI)
 
 Providers are DI services that expose values or APIs.
-They can depend on other providers and may define lifecycle hooks if they are singletons.
+They can depend on other providers and may define `onReady` and `onClose` hooks.
 
 ```js
 import { createProvider } from "@stratify/core";

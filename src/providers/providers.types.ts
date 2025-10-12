@@ -5,8 +5,6 @@ export type BivariantCallback<T extends (...args: any) => any> = {
   bivarianceHack: T;
 }["bivarianceHack"];
 
-export type ProviderLifecycle = "singleton" | "transient";
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ProviderAny = ProviderDef<any, any>;
 
@@ -39,7 +37,6 @@ export interface ProviderDef<
   Value,
 > {
   name: string;
-  lifecycle: ProviderLifecycle;
   deps: ProviderDepsMap;
   onReady?: ProviderHook<ProviderDepsMap, Value>;
   onClose?: ProviderHook<ProviderDepsMap, Value>;
@@ -58,7 +55,6 @@ export interface ProviderOptions<
   Value,
 > {
   name: string;
-  lifecycle?: ProviderLifecycle;
   deps?: ProviderDepsMap;
   expose: (deps: DepValues<ProviderDepsMap>) => Value | Promise<Value>;
   onReady?: ProviderHook<ProviderDepsMap, Value>;

@@ -10,16 +10,27 @@ export class RoutesBuilder {
     StratifyRouteOptions<Record<string, unknown>>
   >();
 
+  private readonly hookNames = [
+    "onRequest",
+    "preParsing",
+    "preValidation",
+    "preHandler",
+    "preSerialization",
+    "onSend",
+    "onResponse",
+    "onTimeout",
+    "onError",
+  ] as const;
+
+  constructor(private readonly moduleName: string) {}
+
   addRoute<S extends Record<string, unknown>>(opts: StratifyRouteOptions<S>) {
-    ensureAsyncCallbacks(`${opts.url} onRequest`, opts.onRequest);
-    ensureAsyncCallbacks(`${opts.url} preParsing`, opts.preParsing);
-    ensureAsyncCallbacks(`${opts.url} preValidation`, opts.preValidation);
-    ensureAsyncCallbacks(`${opts.url} preHandler`, opts.preHandler);
-    ensureAsyncCallbacks(`${opts.url} preSerialization`, opts.preSerialization);
-    ensureAsyncCallbacks(`${opts.url} onSend`, opts.onSend);
-    ensureAsyncCallbacks(`${opts.url} onResponse`, opts.onResponse);
-    ensureAsyncCallbacks(`${opts.url} onTimeout`, opts.onTimeout);
-    ensureAsyncCallbacks(`${opts.url} onError`, opts.onError);
+    for (const name of this.hookNames) {
+      ensureAsyncCallbacks(
+        `hook ${name} in module "${this.moduleName}"`,
+        opts[name],
+      );
+    }
 
     ensureAsyncCallback(`${opts.url} handler`, opts.handler);
 

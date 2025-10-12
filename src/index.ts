@@ -108,7 +108,7 @@ function collectProvidersFromConfig(
   allProviders: Set<ProviderAny>,
   providerNameToId: InstancesMap,
 ): void {
-  const deps = config.deps ?? {};
+  const deps = config.deps;
   for (const p of Object.values(deps)) {
     walkProviders(p as ProviderAny, (pp) => {
       ensureProviderNameUnicity(providerNameToId, pp);

@@ -1,5 +1,6 @@
 import {
   AdapterAny,
+  AdapterCache,
   AdapterDef,
   AdapterMap,
   AdapterOptions,
@@ -21,11 +22,8 @@ export function createAdapter<Value>(
 export async function resolveAdapterMap<AMap extends AdapterMap>(
   fastify: FastifyInstance,
   adapters: AMap,
+  cache: AdapterCache
 ): Promise<AdapterValues<AMap>> {
-  // Memoized within a single resolution pass to support
-  // circular dependencies
-  const cache = new Map<AdapterAny, unknown>();
-
   const resolveOne = async (adapter: AdapterAny): Promise<unknown> => {
     if (cache.has(adapter)) return cache.get(adapter);
 

@@ -11,10 +11,6 @@ export class Container {
   async get<ProviderDepsMap extends BaseProviderDepsMap, Value>(
     provider: ProviderDef<ProviderDepsMap, Value>,
   ): Promise<Value> {
-    if (provider.lifecycle === "transient") {
-      return this.instantiate(provider);
-    }
-
     let value = this.singletons.get(provider) as Promise<Value> | undefined;
     if (!value) {
       value = this.instantiate(provider);

@@ -23,12 +23,8 @@ export function describeTree(root: ModuleAny): string {
   const pad = (depth: number) => "  ".repeat(depth);
 
   function walkProvider(p: ProviderAny, depth: number) {
-    const lifeCol =
-      p.lifecycle === "transient"
-        ? c.yellow("transient")
-        : c.green("singleton");
     lines.push(
-      `${pad(depth)}🔧 ${c.dim("prov")} ${c.cyan(`${p.name}@${getProviderId(p)}`)} [${lifeCol}]`,
+      `${pad(depth)}🔧 ${c.dim("prov")} ${c.cyan(`${p.name}@${getProviderId(p)}`)}`,
     );
     for (const dep of Object.values(p.deps) as ProviderAny[]) {
       walkProvider(dep, depth + 1);

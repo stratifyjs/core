@@ -20,7 +20,6 @@ describe("describeTree", () => {
 
     const siblingProv = createProvider({
       name: "siblingProv",
-      lifecycle: "transient",
       expose: () => ({ y: 2 }),
     });
 
@@ -93,15 +92,15 @@ describe("describeTree", () => {
     📦 mod grandchild@m\d+ \(encapsulate=true\)
       🪝 hooks a
         🔌 adp siblingAdapter
-        🔧 prov grandChildProv@p\d+ \[singleton\]
+        🔧 prov grandChildProv@p\d+
   📦 mod sibling@m\d+ \(encapsulate=false\)
     ⚙️ installer a
-      🔧 prov siblingProv@p\d+ \[transient\]
+      🔧 prov siblingProv@p\d+
     ⚙️ installer b
     🧭 controller a
       🔌 adp siblingAdapter
-      🔧 prov siblingDependent@p\d+ \[singleton\]
-        🔧 prov siblingProv@p\d+ \[transient\]
+      🔧 prov siblingDependent@p\d+
+        🔧 prov siblingProv@p\d+
 `;
 
 console.log(tree)

@@ -8,6 +8,7 @@ import {
   SubModulesMap,
 } from "./module.types";
 import { ProvidersMap } from "../providers";
+import { AdapterCache } from "../fastify";
 
 const kModuleId = Symbol("fastify-dependency-injection:moduleId");
 let __seq = 0;
@@ -46,9 +47,10 @@ export async function registerModule(
   container: Container,
 ): Promise<void> {
   const plugin = async (instance: FastifyInstance) => {
+    const adapterCache: AdapterCache = new WeakMap()
     if (Array.isArray(mod.hooks)) {
       for (const hookConfig of mod.hooks) {
-        await hookConfig.register(instance, container, mod.name);
+        await hookConfig.register(instance, container, mod.name, adapterCache);
       }
     }
 
@@ -60,7 +62,7 @@ export async function registerModule(
 
     if (Array.isArray(mod.controllers)) {
       for (const config of mod.controllers) {
-        await config.register(instance, container, mod.name);
+        await config.register(instance, container, mod.name, adapterCache);
       }
     }
 

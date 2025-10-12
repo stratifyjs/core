@@ -17,3 +17,5 @@ export interface AdapterDef<Value = unknown> {
   expose: (ctx: { fastify: FastifyInstance }) => Value | Promise<Value>;
   _adapter?: never;
 }
+
+export type AdapterCache = WeakMap<AdapterAny, unknown>

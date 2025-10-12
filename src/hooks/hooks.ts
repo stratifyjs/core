@@ -10,7 +10,7 @@ import { Container } from "../container/container";
 import { HttpHooksBuilder } from "./http-hooks-builder";
 import { AppHooksBuilder } from "./application-hooks-builder";
 import { resolveProviderMap } from "../modules";
-import { AdapterMap, resolveAdapterMap } from "../fastify";
+import { AdapterCache, AdapterMap, resolveAdapterMap } from "../fastify";
 
 export function createHooks<
   Providers extends ProvidersMap,
@@ -44,9 +44,10 @@ export function createHooks<
       fastify: FastifyInstance,
       container: Container,
       moduleName: string,
+      cache: AdapterCache,
     ) {
       const providerMap = await resolveProviderMap(container, deps as never);
-      const adapsMap = await resolveAdapterMap(fastify, adaps as never);
+      const adapsMap = await resolveAdapterMap(fastify, adaps as never, cache);
       const hookBuilder =
         type === "http"
           ? new HttpHooksBuilder(moduleName)

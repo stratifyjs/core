@@ -24,20 +24,8 @@ export function createProvider<
 >(
   def: ProviderOptions<ProviderDepsMap, Value>,
 ): ProviderDef<ProviderDepsMap, Value> {
-  if (def.lifecycle === "transient") {
-    if (def.onReady) {
-      throwTransientHookedError("onReady", def.name);
-    }
-    if (def.onClose) {
-      throwTransientHookedError("onClose", def.name);
-    }
-    if (def.onError) {
-      throwTransientHookedError("onError", def.name);
-    }
-  }
   const self: ProviderDef<ProviderDepsMap, Value> = {
     name: def.name,
-    lifecycle: def.lifecycle ?? "singleton",
     deps: (def.deps ?? {}) as ProviderDepsMap,
     expose: def.expose,
     onReady: def.onReady,
@@ -46,7 +34,6 @@ export function createProvider<
     withProviders(updater: (existingDeps: ProviderDepsMap) => ProviderDepsMap) {
       return createProvider<ProviderDepsMap, Value>({
         name: self.name,
-        lifecycle: self.lifecycle,
         deps: updater(deepClone(self.deps)),
         expose: self.expose,
         onReady: self.onReady,
@@ -71,16 +58,4 @@ export async function resolveDeps(container: Container, prov: ProviderAny) {
   }
 
   return out;
-}
-
-export function throwTransientHookedError(
-  hook: "onClose" | "onReady" | "onError",
-  name: string,
-): never {
-  throw new Error(
-    `Provider "${name}" is declared as transient but defines a "${hook}" hook. 
-Transient providers are ephemeral value factories: they may be instantiated many times 
-and do not share hooks across instances. 
-Use a singleton provider if you need lifecycle management.`,
-  );
 }

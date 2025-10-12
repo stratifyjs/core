@@ -95,7 +95,7 @@ describe("routes builder integration", () => {
 
     await t.assert.rejects(
       () => createApp({ root }),
-      /Expected an async function for "\/bad onRequest/,
+          /Expected an async function for "hook onRequest in module "root-bad"\[0\]"/,
     );
   });
 });

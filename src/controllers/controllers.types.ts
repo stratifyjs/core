@@ -20,7 +20,7 @@ import { Static, TSchema } from "@sinclair/typebox";
 import { ExposeDeps, ProvidersMap } from "../providers";
 import { RoutesBuilder } from "./routes-builder";
 import { Container } from "../container/container";
-import { AdapterMap, AdapterValues } from "../fastify";
+import { AdapterCache, AdapterMap, AdapterValues } from "../fastify";
 
 type ErrorHandler = (
   error: unknown,
@@ -110,5 +110,6 @@ export interface ControllerConfig<
     fastify: FastifyInstance,
     container: Container,
     moduleName: string,
+    cache: AdapterCache,
   ): Promise<void>;
 }
