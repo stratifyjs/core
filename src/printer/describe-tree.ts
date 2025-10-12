@@ -64,22 +64,18 @@ export function describeTree(root: ModuleAny): string {
       `${pad(depth)}${emoji} ${c.dim("mod")} ${c.cyan(`${m.name}@${getModuleId(m)}`)} ${c.dim(`(encapsulate=${m.encapsulate !== false})`)}`,
     );
 
-    // hooks
     for (const hook of m.hooks ?? []) {
       walkConfig("🪝", `hooks ${hook.name}`, hook, depth + 1);
     }
 
-    // installers
     for (const inst of m.installers ?? []) {
       walkConfig("⚙️", `installer ${inst.name}`, inst, depth + 1);
     }
 
-    // controllers
     for (const ctrl of m.controllers ?? []) {
       walkConfig("🧭", `controller ${ctrl.name}`, ctrl, depth + 1);
     }
 
-    // submodules
     for (const s of m.subModules) {
       walkModule(s, depth + 1);
     }

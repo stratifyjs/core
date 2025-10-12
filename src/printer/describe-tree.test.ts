@@ -103,6 +103,8 @@ describe("describeTree", () => {
       🔧 prov siblingDependent@p\d+ \[singleton\]
         🔧 prov siblingProv@p\d+ \[transient\]
 `;
+
+console.log(tree)
     // eslint-disable-next-line no-control-regex
     const stripAnsi = (s: string) => s.replace(/\x1B\[[0-9;]*m/g, "");
     t.assert.match(stripAnsi(tree) + "\n", new RegExp(expected));
