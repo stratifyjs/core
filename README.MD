@@ -1,7 +1,7 @@
 # Stratify
 
-Stratify is Fastify with a clear architectural model, built around modules, controllers, hooks, installers, adapters, and a first-class Dependency Injection system. 
-It preserves Fastify’s performance and core primitives (plugins, encapsulation, lifecycle hooks) while adding predictable structure and strong TypeScript ergonomics. 
+Stratify is Fastify with a clear architectural model, built around modules, controllers, hooks, installers, adapters, and a first-class Dependency Injection system.
+It preserves Fastify’s performance and core primitives (plugins, encapsulation, lifecycle hooks) while adding predictable structure and strong TypeScript ergonomics.
 It remains fully compatible with the Fastify ecosystem through adapters and installers.
 
 ## Installation
@@ -13,8 +13,6 @@ pnpm add @stratify/core
 # or
 yarn add @stratify/core
 ```
-
----
 
 ## 1) Create a Module
 
@@ -40,8 +38,6 @@ Each module is a Fastify plugin under the hood.
 - `encapsulate: true` — runs in its own Fastify context; decorators/serializers/settings are private to the module.
 - `encapsulate: false` — shares the parent context; good for shared infrastructure (for example, configuration, CORS).
 
----
-
 ## 2) Bootstrapping
 
 ```js
@@ -50,8 +46,6 @@ import { createApp } from "@stratify/core";
 const app = await createApp({ root });
 await app.listen({ port: 3000 });
 ```
-
----
 
 ## 3) Providers (DI)
 
@@ -81,8 +75,6 @@ const profiles = createProvider({
   // onClose: async ({ fastify, deps, value }) => {},
 });
 ```
-
----
 
 ## 4) Controllers (Routes)
 
@@ -129,8 +121,6 @@ const root = createModule({
   controllers: [userController],
 });
 ```
-
----
 
 ## 5) Hooks
 
@@ -193,8 +183,6 @@ const root = createModule({
 
 Read more about Fastify application hooks: https://fastify.dev/docs/latest/Reference/Hooks/#application-hooks
 
----
-
 ## 6) Installers
 
 Installers configure Fastify for a module scope.
@@ -226,8 +214,6 @@ const root = createModule({
 });
 ```
 
----
-
 ## 7) Adapters
 
 Adapters expose values derived from the **current Fastify instance**.
@@ -255,7 +241,7 @@ const sessionAdapter = createAdapter({
       },
       destroy(req) {
         return req.session.destroy();
-      }
+      },
     };
   },
 });
