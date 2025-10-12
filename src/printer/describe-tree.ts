@@ -47,7 +47,7 @@ export function describeTree(root: ModuleAny): string {
   ) {
     lines.push(`${pad(depth)}${typeEmoji} ${label}`);
     const adaps = config.adaps ?? {};
-    const deps = config.deps ?? {};
+    const deps = config.deps;
 
     for (const a of Object.values(adaps) as AdapterAny[]) {
       walkAdapter(a, depth + 1);
