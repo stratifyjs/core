@@ -1,6 +1,6 @@
 {
   "name": "@stratify/core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Dependency Injection package for the Fastify framework",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -32,7 +32,6 @@
     "prepare": "npm run build",
     "prepublishOnly": "npm run build && npm run test"
   },
-  "keywords": [],
   "author": "jean.antoine.michelet@gmail.com",
   "license": "MIT",
   "devDependencies": {
@@ -63,5 +62,15 @@
   "bugs": {
     "url": "https://github.com/stratifyjs/core/issues"
   },
-  "homepage": "https://github.com/stratifyjs/core#readme"
+  "homepage": "https://github.com/stratifyjs/core#readme",
+  "keywords": [
+  "stratify",
+  "fastify",
+  "framework",
+  "dependency-injection",
+  "ioc",
+  "di",
+  "typescript",
+  "nodejs"
+]
 }
