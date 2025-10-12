@@ -229,7 +229,7 @@ import { createAdapter, createController, createModule } from "@stratify/core";
 
 // Adapter that exposes the running Fastify version
 const versionHolder = createAdapter({
-  name: "version",
+  name: "version", // optional to display tree
   expose: ({ fastify }) => ({
     version: fastify.version,
   }),
