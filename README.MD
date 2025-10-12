@@ -6,12 +6,24 @@ It remains fully compatible with the Fastify ecosystem through adapters and inst
 
 ## Installation
 
+To get started, install the CLI:
+
+```bash
+npm install -g @stratify/cli
+```
+
+Then create a new application:
+
+```bash
+npx stratify-cli new my-app
+```
+
+This scaffolds a ready-to-run TypeScript project with ESLint, Prettier, and a modular folder structure.
+
+If you prefer manual setup, you can install the core library directly:
+
 ```bash
 npm install @stratify/core
-# or
-pnpm add @stratify/core
-# or
-yarn add @stratify/core
 ```
 
 ## 1) Create a Module
