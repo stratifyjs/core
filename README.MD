@@ -217,7 +217,7 @@ const root = createModule({
 ## 7) Adapters
 
 Adapters expose values derived from the **current Fastify instance**.
-They are **resolved for each component that uses them**, ensuring the correct Fastify context and state.
+They are **resolved once for each module that uses them**, ensuring the correct Fastify context and state.
 
 Adapters are meant for reading instance-scoped data or exposing lightweight utilities.
 They should **not register plugins, routes, or hooks**; use **installers** for those actions.
