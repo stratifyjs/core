@@ -1,10 +1,11 @@
 # Stratify
 
-**Stratify** is an architectural framework based on [**Fastify**](https://fastify.dev/) that introduces clear structural boundaries and a robust **Dependency Injection** system. 
-It defines applications through **modules, controllers, hooks, installers, and adapters**, while preserving Fastify's performance and encapsulation model. 
+**Stratify** is an architectural framework built on [**Fastify**](https://fastify.dev/) that introduces clear structural boundaries and a robust **Dependency Injection** system.
+Applications are defined through **modules, controllers, hooks, installers, and adapters**, while maintaining Fastify’s performance and encapsulation model.
 
-Stratify remains fully compatible with the existing Fastify ecosystem.
-The suffix *-ify* acknowledges its Fastify roots, and *strata* refers to its guiding principle of modular layering and clear separation of concerns.
+The suffix *-ify* acknowledges its Fastify heritage, and *strata* expresses its guiding principle of modular layering and clear separation of concerns.
+
+Stratify remains fully compatible with the Fastify ecosystem.
 
 > Early stage: open to community feedback as the API matures toward stability by late 2025.
 
@@ -22,9 +23,9 @@ Then create a new application:
 npx stratify-cli new my-app
 ```
 
-This scaffolds a ready-to-run TypeScript project with ESLint, Prettier, and a modular folder structure.
+This generates a ready-to-use TypeScript project with ESLint, Prettier, and a modular folder structure.
 
-If you prefer manual setup, you can install the core library directly:
+If you prefer manual setup, you can install the core package directly:
 
 ```bash
 npm install @stratify/core
@@ -39,7 +40,7 @@ import { createModule } from "@stratify/core";
 
 const root = createModule({
   name: "root", // required unique name
-  encapsulate: true, // isolate Fastify scope (default: true)
+  encapsulate: true, // encapsulate the module (default: true)
   controllers: [], // HTTP controllers (routes)
   hooks: [], // application or HTTP lifecycle hooks
   installers: [], // install Fastify utilities (plugins, compilers, parsers, etc.)
@@ -49,10 +50,7 @@ const root = createModule({
 
 ### Encapsulation
 
-Each module is a Fastify plugin under the hood.
-
-- `encapsulate: true` — runs in its own Fastify context; decorators/serializers/settings are private to the module.
-- `encapsulate: false` — shares the parent context; good for shared infrastructure (for example, configuration, CORS).
+Each module is compiled into a Fastify plugin within its own [**encapsulation context**](https://fastify.dev/docs/latest/Reference/Encapsulation/). Unlike Fastify, Stratify handles dependencies through its own container, so encapsulation mainly governs hooks and adapters scope, not DI.
 
 ## 2) Bootstrapping
 
@@ -65,13 +63,12 @@ await app.listen({ port: 3000 });
 
 ## 3) Providers (DI)
 
-Providers are DI services that expose values or APIs.
+Providers are DI units that expose data or services.
 They can depend on other providers and may define `onReady` and `onClose` hooks.
 
 ```js
 import { createProvider } from "@stratify/core";
 
-// simple service
 const usersRepository = createProvider({
   name: "usersRepository",
   expose: async () => ({
@@ -87,8 +84,8 @@ const profiles = createProvider({
     find: async (id) => usersRepository.get(id),
   }),
   // optional hooks:
-  // onReady: async ({ fastify, deps, value }) => {},
-  // onClose: async ({ fastify, deps, value }) => {},
+  // onReady: async ({ deps, value }) => {},
+  // onClose: async ({ deps, value }) => {},
 });
 ```
 
@@ -140,8 +137,7 @@ const root = createModule({
 
 ## 5) Hooks
 
-Hooks are either **HTTP** ( request lifecycle) or **application** (server lifecycle).
-All handlers must be async.
+Hooks are either **HTTP** (request lifecycle) or **application** (server lifecycle).
 
 ### HTTP hooks
 
@@ -152,16 +148,14 @@ const httpHooks = createHooks({
   type: "http",
   name: "core-http", // optional label
   build: async ({ builder }) => {
+    // All handlers must be async.
     builder.addHook("onRequest", async (req, reply) => {
-      // example: simple auth header presence check
       if (!req.headers.authorization) {
         return reply.code(401).send({ error: "Unauthorized" });
       }
     });
 
     builder.addHook("onResponse", async (_req, reply) => {
-      // add standard headers for all responses
-      reply.header("x-frame-options", "DENY");
       reply.header("x-content-type-options", "nosniff");
     });
   },
@@ -178,11 +172,11 @@ const appHooks = createHooks({
   name: "lifecycle",
   build: async ({ builder }) => {
     builder.addHook("onReady", async () => {
-      // server prepared; good place to warm caches, start schedulers, etc.
+      // some setup...
     });
 
     builder.addHook("onClose", async () => {
-      // great place to close DB connections or other resources
+      // closing resources...
     });
   },
 });
@@ -203,7 +197,7 @@ Read more about Fastify application hooks: https://fastify.dev/docs/latest/Refer
 
 Installers configure Fastify for a module scope.
 They run **after app hooks and before controllers**.
-Use them to register external plugins (for example, sessions, CORS), compilers, validators, parsers, error formatters etc.
+Use them to register external plugins (for example, sessions, CORS), compilers, validators, parsers, error handlers etc.
 
 ```js
 import { createInstaller, createModule } from "@stratify/core";
@@ -232,11 +226,9 @@ const root = createModule({
 
 ## 7) Adapters
 
-Adapters expose values derived from the **current Fastify instance**.
-They are **resolved once for each module that uses them**, ensuring the correct Fastify context and state.
+Adapters expose values derived from the Fastify instance. 
 
-Adapters are meant for reading instance-scoped data or exposing lightweight utilities.
-They should **not register plugins, routes, or hooks**; use **installers** for those actions.
+They are **resolved once for each module that uses them**, ensuring the correct encapsulation context and state. It follows that they should **NOT** register plugins, routes, or hooks; use **installers** for those actions.
 
 ### Example: version adapter
 
@@ -244,21 +236,18 @@ They should **not register plugins, routes, or hooks**; use **installers** for t
 import { createAdapter, createController, createModule } from "@stratify/core";
 
 // Adapter that exposes the running Fastify version
-const versionHolder = createAdapter({
-  name: "version", // optional to display tree
-  expose: ({ fastify }) => ({
-    version: fastify.version,
-  }),
+const version = createAdapter({
+  expose: ({ fastify }) => fastify.version,
 });
 
 // Controller consuming the adapter
 const versionController = createController({
-  adaps: { versionHolder },
+  adaps: { version },
   build: async ({ builder, adaps }) => {
     builder.addRoute({
       method: "GET",
       url: "/version",
-      handler: async () => ({ version: adaps.versionHolder.version }),
+      handler: async () => ({ version: adaps.version }),
     });
   },
 });
