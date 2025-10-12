@@ -1,8 +1,12 @@
 # Stratify
 
-Stratify is Fastify with a clear architectural model, built around modules, controllers, hooks, installers, adapters, and a first-class Dependency Injection system.
-It preserves Fastify’s performance and core primitives (plugins, encapsulation, lifecycle hooks) while adding predictable structure and strong TypeScript ergonomics.
-It remains fully compatible with the Fastify ecosystem through adapters and installers.
+**Stratify** is an architectural framework based on [**Fastify**](https://fastify.dev/) that introduces clear structural boundaries and a robust **Dependency Injection** system. 
+It defines applications through **modules, controllers, hooks, installers, and adapters**, while preserving Fastify's performance and encapsulation model. 
+
+Stratify remains fully compatible with the existing Fastify ecosystem.
+The suffix *-ify* acknowledges its Fastify roots, and *strata* refers to its guiding principle of modular layering and clear separation of concerns.
+
+> Early stage: open to community feedback as the API matures toward stability by late 2025.
 
 ## Installation
 
