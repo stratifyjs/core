@@ -197,12 +197,12 @@ import fastifySession from "@fastify/session";
 const sessionInstaller = createInstaller({
   name: "session",
   install: async ({ fastify }) => {
-    // It is important to await plugin registration
-    // if you plan to create adapters that depend on
-    // decorators exposed by these plugins.
-    // Awaiting ensures they are immediately available.
-    await fastify.register(fastifyCookie);
-    await fastify.register(fastifySession, {
+    // If you need to access decorators exposed by plugins 
+    // during build time, e.g. to create adapters.
+    // You would have to await the registration: 
+    // await fastify.register
+    fastify.register(fastifyCookie);
+    fastify.register(fastifySession, {
       secret: "a secret with minimum length of 32 characters",
     });
   },
@@ -220,73 +220,36 @@ Adapters expose values derived from the **current Fastify instance**.
 They are **resolved for each component that uses them**, ensuring the correct Fastify context and state.
 
 Adapters are meant for reading instance-scoped data or exposing lightweight utilities.
-They should **not register plugins, routes, or hooks** — that would duplicate for every consumer.
-Use **installers** for such actions.
+They should **not register plugins, routes, or hooks**; use **installers** for those actions.
 
-### Example: session adapter (for `@fastify/session`)
+### Example: version adapter
 
 ```js
-import { createAdapter, createController } from "@stratify/core";
+import { createAdapter, createController, createModule } from "@stratify/core";
 
-const sessionAdapter = createAdapter({
-  name: "session",
-  expose: async () => {
-    // Instance-scoped helpers around req.session
-    return {
-      get(req, key) {
-        return req.session.get(key);
-      },
-      set(req, key, value) {
-        req.session.set(key, value);
-      },
-      destroy(req) {
-        return req.session.destroy();
-      },
-    };
-  },
+// Adapter that exposes the running Fastify version
+const versionHolder = createAdapter({
+  name: "version",
+  expose: ({ fastify }) => ({
+    version: fastify.version,
+  }),
 });
 
-const sessionController = createController({
-  adaps: { session: sessionAdapter },
+// Controller consuming the adapter
+const versionController = createController({
+  adaps: { versionHolder },
   build: async ({ builder, adaps }) => {
     builder.addRoute({
-      method: "POST",
-      url: "/session/login",
-      handler: async (req) => {
-        adaps.session.set(req, "userId", "123");
-        return { ok: true };
-      },
-    });
-
-    builder.addRoute({
       method: "GET",
-      url: "/session/me",
-      handler: async (req) => {
-        const userId = adaps.session.get(req, "userId");
-        return { userId: userId ?? null };
-      },
-    });
-
-    builder.addRoute({
-      method: "POST",
-      url: "/session/logout",
-      handler: async (req) => {
-        await adaps.session.destroy(req);
-        return { ok: true };
-      },
+      url: "/version",
+      handler: async () => ({ version: adaps.versionHolder.version }),
     });
   },
 });
-```
 
-Attach alongside the installer:
-
-```js
-import { createModule } from "@stratify/core";
-
+// Attach to a module
 const root = createModule({
   name: "root",
-  installers: [sessionInstaller],
-  controllers: [sessionController],
+  controllers: [versionController],
 });
 ```
