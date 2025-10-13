@@ -1,7 +1,7 @@
 # Stratify
 
 **Stratify** is an architectural framework built on [**Fastify**](https://fastify.dev/) that introduces clear structural boundaries and a robust **Dependency Injection** system.
-Applications are defined through **modules, controllers, hooks, installers, and adapters**, while maintaining Fastify’s performance and encapsulation model.
+Applications are defined through **modules, providers, controllers, hooks, installers, and adapters**, while maintaining Fastify’s performance and encapsulation model.
 
 The suffix *-ify* acknowledges its Fastify heritage, and *strata* expresses its guiding principle of modular layering and clear separation of concerns.
 
