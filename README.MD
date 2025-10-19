@@ -427,6 +427,7 @@ export const notificationsController = createController({
 });
 ```
 
+Create a module for notifications:
 ```ts
 import { createModule } from "@stratify/core";
 import { notificationsController } from "./http/notifications-controller";
@@ -437,6 +438,7 @@ export const notificationsModule = createModule({
 });
 ```
 
+Then create the app:
 ```ts
 import { createModule, createApp } from "@stratify/core";
 import { notificationsModule } from "./notifications/notifications-module";
