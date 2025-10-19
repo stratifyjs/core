@@ -273,14 +273,16 @@ const root = createModule({
 
 ## 8) Hexagonal Architecture (Ports & Adapters)
 
-Stratify helps to work with **Hexagonal Architecture** (also known as _Ports & Adapters_) through its
-**provider contract types**.
+Stratify helps to work with **Hexagonal Architecture** (also known as _Ports & Adapters_) through its **provider contract types**.
+
+> :warning: The notion of Adapters in Hexagonal Architecture is different from Stratify Adapters.
 
 In this architecture:
 
 - **Ports** define the contracts of what the domain needs.
 - **Adapters** implement those contracts (e.g. database, email, or external APIs).
 - **Use-cases** express domain logic that depends only on ports, not on concrete implementations.
+
 
 The following example demonstrates a simple email `notifications` module with tests.
 
