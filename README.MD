@@ -9,6 +9,18 @@ Stratify remains fully compatible with the Fastify ecosystem.
 
 > Early stage: open to community feedback as the API matures toward stability by late 2025.
 
+## Summary
+
+- [Installation](#installation)
+- [1) Create a Module](#1-create-a-module)
+- [2) Bootstrapping](#2-bootstrapping)
+- [3) Providers (DI)](#3-providers-di)
+- [4) Controllers (Routes)](#4-controllers-routes)
+- [5) Hooks](#5-hooks)
+- [6) Installers](#6-installers)
+- [7) Adapters](#7-adapters)
+- [8) Hexagonal Architecture (Ports & Adapters)](#8-hexagonal-architecture-ports--adapters)
+
 ## Installation
 
 To get started, install the CLI:
