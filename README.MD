@@ -286,31 +286,21 @@ In this architecture:
 
 The following example demonstrates a simple email `notifications` module with tests.
 
-### 8.1 Email Model
-
-```ts
-export interface Email {
-  to: string;
-  subject: string;
-  body: string;
-}
-```
-
-### 8.2 Mailer Port
+### 8.1 Mailer Port
 
 The port defines the required interface that any mailer must implement.
 
 ```ts
 import type { ProviderContract } from "@stratify/core";
 
-interface Value {
+interface Mailer {
   send(email: Email): Promise<void>;
 }
 
-export type MailerContract = ProviderContract<Value>;
+export type MailerContract = ProviderContract<Mailer>;
 ```
 
-### 8.3 Adapters
+### 8.2 Adapters
 
 A concrete adapter implements the port contract.
 Here, a `smtpMailer` simulates sending emails via SMTP or a third-party service.
@@ -330,7 +320,7 @@ export const smtpMailer: MailerContract = createProvider({
 });
 ```
 
-### 8.4 Use-Case and Composition
+### 8.3 Use-Case and Composition
 
 Use-cases express domain logic and are created from abstract dependencies.
 A factory is defined that receives one or more provider contracts.
@@ -368,7 +358,7 @@ export function getSendWelcomeEmailUseCase() {
 }
 ```
 
-### 8.5 Unit Test
+### 8.4 Unit Test
 
 Unit tests import only the factory logic and use a fake provider to verify behavior without external effects.
 Providers can be resolved directly using their built-in `resolve()` method.
@@ -402,7 +392,7 @@ test("sends a welcome email via fake mailer", async (t: TestContext) => {
 });
 ```
 
-### 8.6 HTTP Integration
+### 8.5 HTTP Integration
 
 The same use-case can be injected in a controller.
 
