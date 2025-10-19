@@ -3,7 +3,7 @@
 **Stratify** is an architectural framework built on [**Fastify**](https://fastify.dev/) that introduces clear structural boundaries and a robust **Dependency Injection** system.
 Applications are defined through **modules, providers, controllers, hooks, installers, and adapters**, while maintaining Fastify’s performance and encapsulation model.
 
-The suffix *-ify* acknowledges its Fastify heritage, and *strata* expresses its guiding principle of modular layering and clear separation of concerns.
+The suffix _-ify_ acknowledges its Fastify heritage, and _strata_ expresses its guiding principle of modular layering and clear separation of concerns.
 
 Stratify remains fully compatible with the Fastify ecosystem.
 
@@ -71,7 +71,7 @@ import { createProvider } from "@stratify/core";
 
 const usersRepository = createProvider({
   name: "usersRepository",
-  expose: async () => ({
+  expose: () => ({
     get: (id) => ({ id, name: "Ada" }),
   }),
 });
@@ -80,7 +80,7 @@ const usersRepository = createProvider({
 const profiles = createProvider({
   name: "profiles",
   deps: { usersRepository },
-  expose: async ({ usersRepository }) => ({
+  expose: ({ usersRepository }) => ({
     find: async (id) => usersRepository.get(id),
   }),
   // optional hooks:
@@ -108,7 +108,7 @@ const userController = createController({
   deps: { profiles },
   adaps: {},
   // async build callback with routes builder
-  build: async ({ builder, deps }) => {
+  build: ({ builder, deps }) => {
     builder.addRoute({
       method: "GET",
       url: "/users/:id",
@@ -147,7 +147,7 @@ import { createHooks } from "@stratify/core";
 const httpHooks = createHooks({
   type: "http",
   name: "core-http", // optional label
-  build: async ({ builder }) => {
+  build: ({ builder }) => {
     // All handlers must be async.
     builder.addHook("onRequest", async (req, reply) => {
       if (!req.headers.authorization) {
@@ -170,7 +170,7 @@ Read more about Fastify lifecycle hooks doc: https://fastify.dev/docs/latest/Ref
 const appHooks = createHooks({
   type: "app",
   name: "lifecycle",
-  build: async ({ builder }) => {
+  build: ({ builder }) => {
     builder.addHook("onReady", async () => {
       // some setup...
     });
@@ -207,9 +207,9 @@ import fastifySession from "@fastify/session";
 const sessionInstaller = createInstaller({
   name: "session",
   install: async ({ fastify }) => {
-    // If you need to access decorators exposed by plugins 
+    // If you need to access decorators exposed by plugins
     // during build time, e.g. to create adapters.
-    // You would have to await the registration: 
+    // You would have to await the registration:
     // await fastify.register
     fastify.register(fastifyCookie);
     fastify.register(fastifySession, {
@@ -226,7 +226,7 @@ const root = createModule({
 
 ## 7) Adapters
 
-Adapters expose values derived from the Fastify instance. 
+Adapters expose values derived from the Fastify instance.
 
 They are **resolved once for each module that uses them**, ensuring the correct encapsulation context and state. It follows that they should **NOT** register plugins, routes, or hooks; use **installers** for those actions.
 
@@ -243,7 +243,7 @@ const version = createAdapter({
 // Controller consuming the adapter
 const versionController = createController({
   adaps: { version },
-  build: async ({ builder, adaps }) => {
+  build: ({ builder, adaps }) => {
     builder.addRoute({
       method: "GET",
       url: "/version",
@@ -257,4 +257,183 @@ const root = createModule({
   name: "root",
   controllers: [versionController],
 });
+```
+
+## 8) Hexagonal Architecture (Ports & Adapters)
+
+Stratify helps to work with **Hexagonal Architecture** (also known as _Ports & Adapters_) through its
+**provider contract types**.
+
+In this architecture:
+
+- **Ports** define the contracts of what the domain needs.
+- **Adapters** implement those contracts (e.g. database, email, or external APIs).
+- **Use-cases** express domain logic that depends only on ports, not on concrete implementations.
+
+The following example demonstrates a simple email `notifications` module with tests.
+
+### 8.1 Email Model
+
+```ts
+export interface Email {
+  to: string;
+  subject: string;
+  body: string;
+}
+```
+
+### 8.2 Mailer Port
+
+The port defines the required interface that any mailer must implement.
+
+```ts
+import type { ProviderContract } from "@stratify/core";
+
+interface Value {
+  send(email: Email): Promise<void>;
+}
+
+export type MailerContract = ProviderContract<Value>;
+```
+
+### 8.3 Adapters
+
+A concrete adapter implements the port contract.
+Here, a `smtpMailer` simulates sending emails via SMTP or a third-party service.
+
+```ts
+import { createProvider } from "@stratify/core";
+import type { MailerContract } from "../ports/mailer";
+
+export const smtpMailer: MailerContract = createProvider({
+  name: "notifications.mailer",
+  expose: () => ({
+    async send(email) {
+      console.log(`[SMTP] -> ${email.to} | ${email.subject}`);
+      // send through a real transport here...
+    },
+  }),
+});
+```
+
+### 8.4 Use-Case and Composition
+
+Use-cases express domain logic and are created from abstract dependencies.
+A factory is defined that receives one or more provider contracts.
+
+```ts
+import { createProvider } from "@stratify/core";
+import type { MailerContract } from "../ports/mailer";
+import { smtpMailer } from "../adapters/smtp-mailer";
+
+export function createSendWelcomeEmailUseCase(mailer: MailerContract) {
+  return createProvider({
+    name: "notifications.use-case.send-welcome-email",
+    deps: { mailer },
+    expose: ({ mailer }) => {
+      return async (to: string) => {
+        const subject = "Welcome to Stratify";
+        const body = "Thanks for joining! You’re all set.";
+        await mailer.send({ to, subject, body });
+      };
+    },
+  });
+}
+
+// Singleton getter for lazy composition of the
+// final dependency tree
+let sendWelcomeEmailUseCase: ReturnType<
+  typeof createSendWelcomeEmailUseCase
+> | null = null;
+
+export function getSendWelcomeEmailUseCase() {
+  if (!sendWelcomeEmailUseCase) {
+    sendWelcomeEmailUseCase = createSendWelcomeEmailUseCase(smtpMailer);
+  }
+  return sendWelcomeEmailUseCase;
+}
+```
+
+### 8.5 Unit Test
+
+Unit tests import only the factory logic and use a fake provider to verify behavior without external effects.
+Providers can be resolved directly using their built-in `resolve()` method.
+
+```ts
+import { createProvider } from "@stratify/core";
+import test from "node:test";
+import type { TestContext } from "node:test";
+import { createSendWelcomeEmailUseCase } from "../src/notifications/use-cases/create-send-welcome-email-use-case";
+import type { MailerContract } from "../src/notifications/ports/mailer";
+
+test("sends a welcome email via fake mailer", async (t: TestContext) => {
+  const sent: Email[] = [];
+  const fakeMailer: MailerContract = createProvider({
+    name: "notifications.mailer",
+    expose: () => ({
+      async send(email) {
+        sent.push(email);
+      },
+    }),
+  });
+
+  const useCase = createSendWelcomeEmailUseCase(fakeMailer);
+
+  const sendWelcomeEmail = await useCase.resolve();
+  await sendWelcomeEmail("ada@example.com");
+
+  t.assert.equal(sent.length, 1);
+  t.assert.equal(sent[0].to, "ada@example.com");
+  t.assert.match(sent[0].subject, /welcome/i);
+});
+```
+
+### 8.6 HTTP Integration
+
+The same use-case can be injected in a controller.
+
+```ts
+import { createController } from "@stratify/core";
+import { Type } from "@sinclair/typebox";
+import { getSendWelcomeEmailUseCase } from "../use-cases/send-welcome-email-use-case-provider";
+
+export const notificationsController = createController({
+  name: "notifications",
+  // Composition via singleton getter (lazy-loaded)
+  deps: { sendWelcomeEmail: getSendWelcomeEmailUseCase() },
+  build: ({ builder, deps }) => {
+    builder.addRoute({
+      method: "POST",
+      url: "/welcome-email",
+      schema: { body: Type.Object({ to: Type.String({ format: "email" }) }) },
+      handler: async (req, reply) => {
+        await deps.sendWelcomeEmail(req.body.to);
+        return reply.code(202).send({ ok: true });
+      },
+    });
+  },
+});
+```
+
+```ts
+import { createModule } from "@stratify/core";
+import { notificationsController } from "./http/notifications-controller";
+
+export const notificationsModule = createModule({
+  name: "notifications",
+  controllers: [notificationsController],
+});
+```
+
+```ts
+import { createModule, createApp } from "@stratify/core";
+import { notificationsModule } from "./notifications/notifications-module";
+
+const root = createModule({
+  name: "root",
+  subModules: [notificationsModule],
+});
+
+const app = await createApp({ root });
+await app.listen({ port: 3000 });
 ```

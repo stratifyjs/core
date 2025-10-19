@@ -40,3 +40,4 @@ expectType<YContract>(y);
 
 const yBis = createYProvider(xBis);
 expectType<YContract>(yBis);
+
