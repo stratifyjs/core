@@ -101,6 +101,21 @@ const profiles = createProvider({
 });
 ```
 
+### `withProviders()`
+
+All providers include a **`withProviders()`** helper.
+It clones the provider and lets you replace specific dependencies, typically for unit testing.
+
+```ts
+const testProvider = profilesProvider.withProviders((deps) => ({
+  ...deps,
+  usersRepository: fakeUsersRepository,
+}));
+
+const profiles = await testProvider.resolve();
+```
+
+
 ## 4) Controllers (Routes)
 
 Controllers declare routes via a builder.
