@@ -289,6 +289,7 @@ const root = createModule({
 ## 8) Hexagonal Architecture (Ports & Adapters)
 
 > Currently looking for a better implementation, read: https://www.linkedin.com/feed/update/urn:li:activity:7388128163131834368/
+>
 > Or here: https://www.reddit.com/r/node/comments/1ofizas/comment/nlfxco6/
 
 Stratify helps to work with **Hexagonal Architecture** (also known as _Ports & Adapters_) through its **provider contract types**.
