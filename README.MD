@@ -94,7 +94,6 @@ const root = createModule({
 
 const app = await createApp({ root });
 
-// Print a colored structural tree of the app
 console.log(app.describeTree());
 ```
 
