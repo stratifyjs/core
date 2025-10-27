@@ -78,7 +78,7 @@ await app.listen({ port: 3000 });
 Stratify applications can describe their internal module and dependency
 hierarchy through the **`describeTree()`** utility.
 
-This function produces a human-readable text representation of the **module tree**, including 
+This function produces a human-readable text representation of the **module tree**, including
 submodules, hooks, installers, controllers, adapters, and providers.
 
 ```ts
@@ -107,7 +107,7 @@ console.log(app.describeTree());
 
 ### Full hierarchy display
 
-When modules include **hooks, installers, controllers, adapters, and 
+When modules include **hooks, installers, controllers, adapters, and
 providers**, `describeTree()` shows each layer with dependency nesting:
 
 ```
@@ -120,7 +120,7 @@ providers**, `describeTree()` shows each layer with dependency nesting:
       🔌 adp siblingAdapter
       🔧 prov siblingDependent@p2
         🔧 prov siblingProv@p1
- ```
+```
 
 ## 3) Providers (DI)
 
@@ -163,7 +163,6 @@ const testProvider = profilesProvider.withProviders((deps) => ({
 
 const profiles = await testProvider.resolve();
 ```
-
 
 ## 4) Controllers (Routes)
 
@@ -351,7 +350,6 @@ In this architecture:
 - **Adapters** implement those contracts (e.g. database, email, or external APIs).
 - **Use-cases** express domain logic that depends only on ports, not on concrete implementations.
 
-
 The following example demonstrates a simple email `notifications` module with tests.
 
 ### 8.1 Mailer Port
@@ -488,6 +486,7 @@ export const notificationsController = createController({
 ```
 
 Create a module for notifications:
+
 ```ts
 import { createModule } from "@stratify/core";
 import { notificationsController } from "./http/notifications-controller";
@@ -499,6 +498,7 @@ export const notificationsModule = createModule({
 ```
 
 Then create the app:
+
 ```ts
 import { createModule, createApp } from "@stratify/core";
 import { notificationsModule } from "./notifications/notifications-module";

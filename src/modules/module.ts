@@ -47,7 +47,7 @@ export async function registerModule(
   container: Container,
 ): Promise<void> {
   const plugin = async (instance: FastifyInstance) => {
-    const adapterCache: AdapterCache = new WeakMap()
+    const adapterCache: AdapterCache = new WeakMap();
     if (Array.isArray(mod.hooks)) {
       for (const hookConfig of mod.hooks) {
         await hookConfig.register(instance, container, mod.name, adapterCache);

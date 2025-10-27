@@ -41,6 +41,7 @@
     "c8": "^10.1.3",
     "eslint": "^9.35.0",
     "eslint-plugin-import": "^2.32.0",
+    "glob": "^11.0.3",
     "prettier": "^3.6.2",
     "tsd": "^0.33.0",
     "tsup": "^8.5.0",
@@ -64,13 +65,13 @@
   },
   "homepage": "https://github.com/stratifyjs/core#readme",
   "keywords": [
-  "stratify",
-  "fastify",
-  "framework",
-  "dependency-injection",
-  "ioc",
-  "di",
-  "typescript",
-  "nodejs"
-]
+    "stratify",
+    "fastify",
+    "framework",
+    "dependency-injection",
+    "ioc",
+    "di",
+    "typescript",
+    "nodejs"
+  ]
 }

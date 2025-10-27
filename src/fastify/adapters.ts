@@ -22,7 +22,7 @@ export function createAdapter<Value>(
 export async function resolveAdapterMap<AMap extends AdapterMap>(
   fastify: FastifyInstance,
   adapters: AMap,
-  cache: AdapterCache
+  cache: AdapterCache,
 ): Promise<AdapterValues<AMap>> {
   const resolveOne = async (adapter: AdapterAny): Promise<unknown> => {
     if (cache.has(adapter)) return cache.get(adapter);

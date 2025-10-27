@@ -18,4 +18,4 @@ export interface AdapterDef<Value = unknown> {
   _adapter?: never;
 }
 
-export type AdapterCache = WeakMap<AdapterAny, unknown>
+export type AdapterCache = WeakMap<AdapterAny, unknown>;
