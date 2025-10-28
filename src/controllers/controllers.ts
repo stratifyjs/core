@@ -39,7 +39,10 @@ export function createController<
         deps: providerMap as never,
         adaps: adapterMap,
       });
-      routesBuilder.register(fastify);
+
+      for (const route of routesBuilder.getRoutes()) {
+        fastify.route(route);
+      }
     },
   };
 }

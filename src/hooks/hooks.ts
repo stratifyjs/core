@@ -59,7 +59,12 @@ export function createHooks<
         deps: providerMap,
         adaps: adapsMap,
       });
-      hookBuilder.register(fastify);
+
+      for (const [name, handlers] of Object.entries(hookBuilder.getHooks())) {
+        for (const handler of handlers) {
+          fastify.addHook(name as never, handler);
+        }
+      }
     },
   };
 }

@@ -1,4 +1,3 @@
-import { FastifyInstance } from "fastify";
 import { AppHookMap, AppHookName } from "./hooks.types";
 import {
   ensureAsyncCallback,
@@ -40,14 +39,6 @@ export class AppHooksBuilder {
       this.hooks[name].push(handler as never);
     }
     return this;
-  }
-
-  register(instance: FastifyInstance): void {
-    for (const [name, handlers] of Object.entries(this.hooks)) {
-      for (const handler of handlers) {
-        instance.addHook(name as AppHookName, handler);
-      }
-    }
   }
 
   getHooks(): Readonly<AppHookMap> {
