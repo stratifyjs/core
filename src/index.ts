@@ -39,15 +39,15 @@ export async function createApp({
   const allProviders = new Set<ProviderAny>();
   walkModules(root, (m) => {
     ensureModuleNameUnicity(moduleNameToId, m);
-    for (const hook of m.hooks ?? []) {
+    for (const hook of m.hooks) {
       collectProvidersFromConfig(hook, allProviders, providerNameToId);
     }
 
-    for (const controller of m.controllers ?? []) {
+    for (const controller of m.controllers) {
       collectProvidersFromConfig(controller, allProviders, providerNameToId);
     }
 
-    for (const installer of m.installers ?? []) {
+    for (const installer of m.installers) {
       collectProvidersFromConfig(installer, allProviders, providerNameToId);
     }
   });
@@ -56,14 +56,18 @@ export async function createApp({
 
   await registerModule(fastify, root, container);
 
+  const ctx = {
+    name: root.name,
+    bindings: root.bindings
+  }
   fastify.addHook("onReady", async () => {
     for (const prov of allProviders) {
       if (!prov.onReady) {
         continue;
       }
 
-      const deps = await resolveDeps(container, prov);
-      const value = await container.get(prov);
+      const deps = await resolveDeps(container, prov, ctx);
+      const value = await container.get(prov, ctx);
       await prov.onReady({ fastify, deps: deps, value: value });
     }
   });
@@ -74,8 +78,8 @@ export async function createApp({
         continue;
       }
 
-      const deps = await resolveDeps(container, prov);
-      const value = await container.get(prov);
+      const deps = await resolveDeps(container, prov, ctx);
+      const value = await container.get(prov, ctx);
       await prov.onClose({ fastify, deps: deps, value: value });
     }
   });

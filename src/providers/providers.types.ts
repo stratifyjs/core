@@ -38,6 +38,7 @@ export interface ProviderDef<
 > {
   name: string;
   deps: ProviderDepsMap;
+  isContract: boolean;
   onReady?: ProviderHook<ProviderDepsMap, Value>;
   onClose?: ProviderHook<ProviderDepsMap, Value>;
   onError?: ProviderErrorHook<ProviderDepsMap, Value>;

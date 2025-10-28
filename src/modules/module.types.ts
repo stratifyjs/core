@@ -1,8 +1,13 @@
 import type { FastifyInstance } from "fastify";
-import { ExposeDeps, ProvidersMap } from "../providers";
+import { ExposeDeps, ProviderAny, ProvidersMap } from "../providers";
 import { AppHooksConfig, HttpHooksConfig } from "../hooks";
 import { ControllerConfig } from "../controllers";
 import { InstallerConfig } from "../fastify/installers.types";
+
+export interface ModuleContext {
+  name: string;
+  bindings: ProviderAny[];
+}
 
 export type AccessFastifyCallback<Providers extends ProvidersMap> = (ctx: {
   fastify: FastifyInstance;
@@ -18,11 +23,12 @@ export interface ModuleDef<SubModules extends SubModulesMap> {
   subModules: SubModules;
   encapsulate: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  installers?: InstallerConfig<any>[];
+  installers: InstallerConfig<any>[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  controllers?: ControllerConfig<any, any>[];
+  controllers: ControllerConfig<any, any>[];
+  bindings: ProviderAny[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  hooks?: (AppHooksConfig<any, any> | HttpHooksConfig<any, any>)[];
+  hooks: (AppHooksConfig<any, any> | HttpHooksConfig<any, any>)[];
   _mod?: never;
 }
 
@@ -34,6 +40,7 @@ export type ModuleOptions<SubModules extends SubModulesMap> = {
   installers?: InstallerConfig<any>[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   controllers?: ControllerConfig<any, any>[];
+  bindings?: ProviderAny[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   hooks?: (AppHooksConfig<any, any> | HttpHooksConfig<any, any>)[];
 };

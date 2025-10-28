@@ -1,4 +1,5 @@
 import { Container } from "../container/container";
+import { ModuleContext } from "../modules";
 import { deepClone } from "../utils/deep-clone";
 import {
   BaseProviderDepsMap,
@@ -18,6 +19,17 @@ export function getProviderId(provider: ProviderAny): string {
   return (provider as never)[kProviderId];
 }
 
+export function contract<Value>(name: string) {
+  const provider = createProvider({
+    name,
+    expose: () => undefined as Value,
+  });
+
+  provider.isContract = true;
+
+  return provider;
+}
+
 export function createProvider<
   const ProviderDepsMap extends BaseProviderDepsMap,
   Value,
@@ -30,14 +42,16 @@ export function createProvider<
     expose: def.expose,
     onReady: def.onReady,
     onClose: def.onClose,
-    resolve: async () => new Container().get(self),
+    isContract: false,
+    resolve: async () =>
+      new Container().get(self, {
+        name: `self-resolution:${def.name}`,
+        bindings: [],
+      }),
     withProviders(updater: (existingDeps: ProviderDepsMap) => ProviderDepsMap) {
       return createProvider<ProviderDepsMap, Value>({
-        name: self.name,
+        ...self,
         deps: updater(deepClone(self.deps)),
-        expose: self.expose,
-        onReady: self.onReady,
-        onClose: self.onClose,
       });
     },
   };
@@ -50,11 +64,15 @@ export function createProvider<
   return self;
 }
 
-export async function resolveDeps(container: Container, prov: ProviderAny) {
+export async function resolveDeps(
+  container: Container,
+  prov: ProviderAny,
+  ctx: ModuleContext,
+) {
   const deps = prov.deps;
   const out: Record<string, unknown> = {};
   for (const [k, p] of Object.entries(deps)) {
-    out[k] = await container.get(p as ProviderAny);
+    out[k] = await container.get(p as ProviderAny, ctx);
   }
 
   return out;

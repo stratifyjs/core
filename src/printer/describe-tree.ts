@@ -60,15 +60,15 @@ export function describeTree(root: ModuleAny): string {
       `${pad(depth)}${emoji} ${c.dim("mod")} ${c.cyan(`${m.name}@${getModuleId(m)}`)} ${c.dim(`(encapsulate=${m.encapsulate !== false})`)}`,
     );
 
-    for (const hook of m.hooks ?? []) {
+    for (const hook of m.hooks) {
       walkConfig("🪝", `hooks ${hook.name}`, hook, depth + 1);
     }
 
-    for (const inst of m.installers ?? []) {
+    for (const inst of m.installers) {
       walkConfig("⚙️", `installer ${inst.name}`, inst, depth + 1);
     }
 
-    for (const ctrl of m.controllers ?? []) {
+    for (const ctrl of m.controllers) {
       walkConfig("🧭", `controller ${ctrl.name}`, ctrl, depth + 1);
     }
 

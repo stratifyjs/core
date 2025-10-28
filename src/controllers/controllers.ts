@@ -25,15 +25,15 @@ export function createController<
     adaps,
     name,
     build,
-    async register(fastify, container, moduleName, cache) {
-      const providerMap = await resolveProviderMap(container, deps);
+    async register(fastify, container, ctx, cache) {
+      const providerMap = await resolveProviderMap(container, deps, ctx);
       const adapterMap = await resolveAdapterMap(
         fastify,
         adaps as never,
         cache,
       );
 
-      const routesBuilder = new RoutesBuilder(moduleName);
+      const routesBuilder = new RoutesBuilder(ctx.name);
       await build({
         builder: routesBuilder,
         deps: providerMap as never,

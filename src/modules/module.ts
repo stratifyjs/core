@@ -3,6 +3,7 @@ import fp from "fastify-plugin";
 import type { Container } from "../container/container";
 import {
   ModuleAny,
+  ModuleContext,
   ModuleDef,
   ModuleOptions,
   SubModulesMap,
@@ -28,9 +29,10 @@ export function createModule<const SubModules extends SubModulesMap>(
     name: def.name,
     subModules: (def.subModules ?? []) as SubModules,
     encapsulate: def.encapsulate ?? true,
-    installers: def.installers,
-    controllers: def.controllers,
-    hooks: def.hooks,
+    installers: def.installers ?? [],
+    controllers: def.controllers ?? [],
+    bindings: def.bindings ?? [],
+    hooks: def.hooks ?? [],
   };
 
   Object.defineProperty(self, kModuleId, {
@@ -47,22 +49,26 @@ export async function registerModule(
   container: Container,
 ): Promise<void> {
   const plugin = async (instance: FastifyInstance) => {
+    const ctx = {
+      name: mod.name,
+      bindings: mod.bindings
+    }
     const adapterCache: AdapterCache = new WeakMap();
     if (Array.isArray(mod.hooks)) {
       for (const hookConfig of mod.hooks) {
-        await hookConfig.register(instance, container, mod.name, adapterCache);
+        await hookConfig.register(instance, container, ctx, adapterCache);
       }
     }
 
     if (Array.isArray(mod.installers)) {
       for (const config of mod.installers) {
-        await config.register(instance, container, mod.name);
+        await config.register(instance, container, ctx);
       }
     }
 
     if (Array.isArray(mod.controllers)) {
       for (const config of mod.controllers) {
-        await config.register(instance, container, mod.name, adapterCache);
+        await config.register(instance, container, ctx, adapterCache);
       }
     }
 
@@ -82,10 +88,11 @@ export async function registerModule(
 export async function resolveProviderMap(
   container: Container,
   map: ProvidersMap,
+  ctx: ModuleContext
 ) {
   const out: Record<string, unknown> = {};
   for (const [k, p] of Object.entries(map)) {
-    out[k] = await container.get(p); // return always a new instance if transiant
+    out[k] = await container.get(p, ctx); // return always a new instance if transiant
   }
 
   return out;

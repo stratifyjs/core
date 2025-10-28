@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import type { ProvidersMap, ExposeDeps } from "../../src/providers";
 import type { Container } from "../../src/container/container";
+import { ModuleContext } from "../modules";
 
 /**
  * Installer builder callback.
@@ -28,6 +29,6 @@ export interface InstallerConfig<Providers extends ProvidersMap> {
   register(
     fastify: FastifyInstance,
     container: Container,
-    moduleName: string,
+    ctx: ModuleContext,
   ): Promise<void>;
 }

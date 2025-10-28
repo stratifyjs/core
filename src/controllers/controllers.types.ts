@@ -21,6 +21,7 @@ import { ExposeDeps, ProvidersMap } from "../providers";
 import { RoutesBuilder } from "./routes-builder";
 import { Container } from "../container/container";
 import { AdapterCache, AdapterMap, AdapterValues } from "../fastify";
+import { ModuleContext } from "../modules";
 
 type ErrorHandler = (
   error: unknown,
@@ -109,7 +110,7 @@ export interface ControllerConfig<
   register(
     fastify: FastifyInstance,
     container: Container,
-    moduleName: string,
+    moduleContext: ModuleContext,
     cache: AdapterCache,
   ): Promise<void>;
 }

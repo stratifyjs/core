@@ -9,7 +9,7 @@ import {
 import { Container } from "../container/container";
 import { HttpHooksBuilder } from "./http-hooks-builder";
 import { AppHooksBuilder } from "./application-hooks-builder";
-import { resolveProviderMap } from "../modules";
+import { ModuleContext, resolveProviderMap } from "../modules";
 import { AdapterCache, AdapterMap, resolveAdapterMap } from "../fastify";
 
 export function createHooks<
@@ -43,15 +43,15 @@ export function createHooks<
     async register(
       fastify: FastifyInstance,
       container: Container,
-      moduleName: string,
+      ctx: ModuleContext,
       cache: AdapterCache,
     ) {
-      const providerMap = await resolveProviderMap(container, deps as never);
+      const providerMap = await resolveProviderMap(container, deps as never, ctx);
       const adapsMap = await resolveAdapterMap(fastify, adaps as never, cache);
       const hookBuilder =
         type === "http"
-          ? new HttpHooksBuilder(moduleName)
-          : new AppHooksBuilder(moduleName);
+          ? new HttpHooksBuilder(ctx.name)
+          : new AppHooksBuilder(ctx.name);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (build as any)({
