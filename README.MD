@@ -334,174 +334,123 @@ const root = createModule({
 });
 ```
 
-## 8) Hexagonal Architecture (Ports & Adapters)
+## 8) Architectures Based on the Dependency Inversion Principle (DIP)
 
-> Currently looking for a better implementation, read: https://www.linkedin.com/feed/update/urn:li:activity:7388128163131834368/
->
-> Or here: https://www.reddit.com/r/node/comments/1ofizas/comment/nlfxco6/
+Stratify supports architectures that rely on the **Dependency Inversion Principle (DIP)**
+through its **contract providers**.
 
-Stratify helps to work with **Hexagonal Architecture** (also known as _Ports & Adapters_) through its **provider contract types**.
+### 8.1 Declaring a Contract
 
-> :warning: The notion of Adapters in Hexagonal Architecture is different from Stratify Adapters.
-
-In this architecture:
-
-- **Ports** define the contracts of what the domain needs.
-- **Adapters** implement those contracts (e.g. database, email, or external APIs).
-- **Use-cases** express domain logic that depends only on ports, not on concrete implementations.
-
-The following example demonstrates a simple email `notifications` module with tests.
-
-### 8.1 Mailer Port
-
-The port defines the required interface that any mailer must implement.
+Contracts are special providers that define types but cannot be instantiated:
 
 ```ts
-import type { ProviderContract } from "@stratify/core";
+import { contract } from "@stratify/core";
 
-interface Mailer {
-  send(email: Email): Promise<void>;
-}
+export const MAILER_TOKEN = "mailer";
 
-export type MailerContract = ProviderContract<Mailer>;
+export const Mailer = contract<{
+  send(to: string, body: string): void;
+}>(MAILER_TOKEN);
 ```
 
-### 8.2 Adapters
+If a contract is used but not bound in its module, Stratify throws an error.
 
-A concrete adapter implements the port contract.
-Here, a `smtpMailer` simulates sending emails via SMTP or a third-party service.
+```ts
+import { createProvider, createModule, createApp } from "@stratify/core";
+import { Mailer } from "./mailer";
+
+const sendWelcome = createProvider({
+  name: "send-welcome",
+  deps: { mailer: Mailer },
+  expose: ({ mailer }) => ({
+    run(email: string) {
+      mailer.send(email, "Welcome!");
+    },
+  }),
+});
+
+const welcomeController = createController({});
+
+const root = createModule({
+  name: "root",
+  controllers: [welcomeController],
+  bindings: [], // No binding for "mailer"
+});
+
+await createApp({ root });
+```
+
+### 8.2 Creating a Binding
+
+A **binding** is simply a regular provider that uses the same `name` as the contract.
+It can be declared anywhere, just like any other provider.
 
 ```ts
 import { createProvider } from "@stratify/core";
-import type { MailerContract } from "../ports/mailer";
+import { MAILER_TOKEN } from "../contracts/mailer";
 
-export const smtpMailer: MailerContract = createProvider({
-  name: "notifications.mailer",
+export const smtpMailer = createProvider({
+  name: MAILER_TOKEN,
   expose: () => ({
-    async send(email) {
-      console.log(`[SMTP] -> ${email.to} | ${email.subject}`);
-      // send through a real transport here...
+    send(to: string, body: string) {
+      console.log(`[SMTP] ${to} -> ${body}`);
     },
   }),
 });
 ```
 
-### 8.3 Use-Case and Composition
+### 8.3 Declaring Dependencies as Contracts
 
-Use-cases express domain logic and are created from abstract dependencies.
-A factory is defined that receives one or more provider contracts.
+You can now declare your dependencies as **contracts**:
 
 ```ts
 import { createProvider } from "@stratify/core";
-import type { MailerContract } from "../ports/mailer";
-import { smtpMailer } from "../adapters/smtp-mailer";
+import { Mailer } from "../contracts/mailer";
 
-export function createSendWelcomeEmailUseCase(mailer: MailerContract) {
-  return createProvider({
-    name: "notifications.use-case.send-welcome-email",
-    deps: { mailer },
-    expose: ({ mailer }) => {
-      return async (to: string) => {
-        const subject = "Welcome to Stratify";
-        const body = "Thanks for joining! You’re all set.";
-        await mailer.send({ to, subject, body });
-      };
+export const sendWelcomeEmail = createProvider({
+  name: "send-welcome-email",
+  deps: { mailer: Mailer },
+  expose: ({ mailer }) => ({
+    async execute(to: string) {
+      mailer.send(to, "Welcome to Stratify!");
     },
-  });
-}
-
-// Singleton getter for lazy composition of the
-// final dependency tree
-let sendWelcomeEmailUseCase: ReturnType<
-  typeof createSendWelcomeEmailUseCase
-> | null = null;
-
-export function getSendWelcomeEmailUseCase() {
-  if (!sendWelcomeEmailUseCase) {
-    sendWelcomeEmailUseCase = createSendWelcomeEmailUseCase(smtpMailer);
-  }
-  return sendWelcomeEmailUseCase;
-}
-```
-
-### 8.4 Unit Test
-
-Unit tests import only the factory logic and use a fake provider to verify behavior without external effects.
-Providers can be resolved directly using their built-in `resolve()` method.
-
-```ts
-import { createProvider } from "@stratify/core";
-import test from "node:test";
-import type { TestContext } from "node:test";
-import { createSendWelcomeEmailUseCase } from "../src/notifications/use-cases/create-send-welcome-email-use-case";
-import type { MailerContract } from "../src/notifications/ports/mailer";
-
-test("sends a welcome email via fake mailer", async (t: TestContext) => {
-  const sent: Email[] = [];
-  const fakeMailer: MailerContract = createProvider({
-    name: "notifications.mailer",
-    expose: () => ({
-      async send(email) {
-        sent.push(email);
-      },
-    }),
-  });
-
-  const useCase = createSendWelcomeEmailUseCase(fakeMailer);
-
-  const sendWelcomeEmail = await useCase.resolve();
-  await sendWelcomeEmail("ada@example.com");
-
-  t.assert.equal(sent.length, 1);
-  t.assert.equal(sent[0].to, "ada@example.com");
-  t.assert.match(sent[0].subject, /welcome/i);
+  }),
 });
 ```
 
-### 8.5 HTTP Integration
+### 8.4 Binding
 
-The same use-case can be injected in a controller.
+Then, you must bind contracts to specific providers via the `bindings` property:
 
 ```ts
-import { createController } from "@stratify/core";
+import { createController, createModule, createApp } from "@stratify/core";
 import { Type } from "@sinclair/typebox";
-import { getSendWelcomeEmailUseCase } from "../use-cases/send-welcome-email-use-case-provider";
+import { sendWelcomeEmail } from "../use-cases/send-welcome-email";
+import { smtpMailer } from "../adapters/smtp-mailer";
 
 export const notificationsController = createController({
   name: "notifications",
-  // Composition via singleton getter (lazy-loaded)
-  deps: { sendWelcomeEmail: getSendWelcomeEmailUseCase() },
+  deps: { sendWelcomeEmail },
   build: ({ builder, deps }) => {
     builder.addRoute({
       method: "POST",
-      url: "/welcome-email",
-      schema: { body: Type.Object({ to: Type.String({ format: "email" }) }) },
+      url: "/welcome",
+      schema: {
+        body: Type.Object({ to: Type.String({ format: "email" }) }),
+      },
       handler: async (req, reply) => {
-        await deps.sendWelcomeEmail(req.body.to);
-        return reply.code(202).send({ ok: true });
+        await deps.sendWelcomeEmail.execute(req.body.to);
+        reply.code(202).send({ ok: true });
       },
     });
   },
 });
-```
 
-Create a module for notifications:
-
-```ts
-import { createModule } from "@stratify/core";
-import { notificationsController } from "./http/notifications-controller";
-
-export const notificationsModule = createModule({
+const notificationsModule = createModule({
   name: "notifications",
   controllers: [notificationsController],
+  bindings: [smtpMailer], // binds the "mailer" contract to smtpMailer
 });
-```
-
-Then create the app:
-
-```ts
-import { createModule, createApp } from "@stratify/core";
-import { notificationsModule } from "./notifications/notifications-module";
 
 const root = createModule({
   name: "root",
