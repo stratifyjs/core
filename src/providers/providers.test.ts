@@ -296,6 +296,53 @@ describe("contract bindings", () => {
     );
   });
 
+  test("provider cannot declare hooks and contract dependencies at the same time (detailed error)", async (t: TestContext) => {
+    t.plan(6);
+
+    const MAILER_TOKEN = "mailer";
+    const Mailer = contract<{ send: (to: string, msg: string) => void }>(
+      MAILER_TOKEN,
+    );
+
+    const DB_TOKEN = "db";
+    const Db = contract<{ whatever: () => void }>(DB_TOKEN);
+
+    try {
+      createProvider({
+        name: "mailer-hook-provider",
+        deps: { mailer: Mailer, db: Db },
+        expose: () => ({ x: 1 }),
+        onReady: async () => {},
+        onClose: async () => {},
+      });
+    } catch (e) {
+      const err = e as Error;
+
+      t.assert.ok(err);
+
+      const msg = err!.message;
+      t.assert.match(
+        msg,
+        /Invalid provider "mailer-hook-provider": cannot declare both lifecycle hooks and contract dependencies/,
+      );
+      t.assert.match(msg, /Detected hooks: \[onReady, onClose\]\./);
+      t.assert.match(
+        msg,
+        /Detected contract dependencies: \["mailer", "db"\]\./,
+      );
+      t.assert.match(
+        msg,
+        /Hooks execute in the root context, while contracts are bound at module level\./,
+      );
+      t.assert.match(
+        msg,
+        /To fix: remove the contract dependencies from this provider or relocate its hooks\./,
+      );
+
+      console.error(msg);
+    }
+  });
+
   test("resolves correctly when contract has binding", async (t: TestContext) => {
     let sent = "";
     const MAILER_TOKEN = "mailer";

@@ -6,6 +6,7 @@ import {
   ProviderAny,
   ProviderDef,
   ProviderOptions,
+  ProvidersMap,
 } from "./providers.types";
 
 const kProviderId = Symbol("fastify-di:providerId");
@@ -56,6 +57,8 @@ export function createProvider<
     },
   };
 
+  ensureNoContractsDepsWithHooks(self as ProviderAny);
+
   Object.defineProperty(self, kProviderId, {
     value: nextId(),
     enumerable: false,
@@ -76,4 +79,33 @@ export async function resolveDeps(
   }
 
   return out;
+}
+
+function ensureNoContractsDepsWithHooks(
+  provider: ProviderDef<ProvidersMap, unknown>,
+) {
+  const hasContractDeps = Object.values(provider.deps).some(
+    (dep) => dep.isContract,
+  );
+  const hasHooks = provider.onReady || provider.onClose;
+  if (hasContractDeps && hasHooks) {
+    const contracts = Object.values(provider.deps)
+      .filter((d) => d.isContract)
+      .map((d) => `"${d.name}"`)
+      .join(", ");
+
+    const hooks: string[] = [];
+    if (provider.onReady) hooks.push("onReady");
+    if (provider.onClose) hooks.push("onClose");
+
+    throw new Error(
+      [
+        `Invalid provider "${provider.name}": cannot declare both lifecycle hooks and contract dependencies.`,
+        `Detected hooks: [${hooks.join(", ")}].`,
+        `Detected contract dependencies: [${contracts}].`,
+        `Hooks execute in the root context, while contracts are bound at module level.`,
+        `To fix: remove the contract dependencies from this provider or relocate its hooks.`,
+      ].join("\n"),
+    );
+  }
 }
