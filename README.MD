@@ -19,7 +19,7 @@ Stratify remains fully compatible with the Fastify ecosystem.
 - [5) Hooks](#5-hooks)
 - [6) Installers](#6-installers)
 - [7) Adapters](#7-adapters)
-- [8) Hexagonal Architecture (Ports & Adapters)](#8-hexagonal-architecture-ports--adapters)
+- [8) Architectures Based on the Dependency Inversion Principle (DIP)](#8-architectures-based-on-the-dependency-inversion-principle-dip)
 
 ## Installation
 
