@@ -390,9 +390,9 @@ It can be declared anywhere, just like any other provider.
 
 ```ts
 import { createProvider } from "@stratify/core";
-import { MAILER_TOKEN } from "../contracts/mailer";
+import { MAILER_TOKEN, Mailer } from "../contracts/mailer";
 
-export const smtpMailer = createProvider({
+export const smtpMailer: typeof Mailer = createProvider({
   name: MAILER_TOKEN,
   expose: () => ({
     send(to: string, body: string) {
