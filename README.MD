@@ -443,7 +443,7 @@ export const notificationsController = createController({
       },
       handler: async (req, reply) => {
         await deps.sendWelcomeEmail.execute(req.body.to);
-        reply.code(202).send({ ok: true });
+        return { ok: true };
       },
     });
   },
