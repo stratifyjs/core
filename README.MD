@@ -369,7 +369,10 @@ const sendWelcome = createProvider({
   }),
 });
 
-const welcomeController = createController({});
+const welcomeController = createController({
+  deps: { sendWelcome },
+  build: () => {}
+});
 
 const root = createModule({
   name: "root",
