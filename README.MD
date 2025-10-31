@@ -73,6 +73,20 @@ const app = await createApp({ root });
 await app.listen({ port: 3000 });
 ```
 
+### Using a Custom Fastify Instance
+
+You can provide your own Fastify instance with custom configuration:
+
+```js
+import Fastify from "fastify";
+import { createApp } from "@stratify/core";
+
+const fastifyInstance = Fastify({});
+
+const app = await createApp({ fastifyInstance, root });
+await app.listen({ port: 3000 });
+```
+
 ### Inspecting the Application Tree
 
 Stratify applications can describe their internal module and dependency
@@ -371,7 +385,7 @@ const sendWelcome = createProvider({
 
 const welcomeController = createController({
   deps: { sendWelcome },
-  build: () => {}
+  build: () => {},
 });
 
 const root = createModule({
