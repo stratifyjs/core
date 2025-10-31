@@ -15,8 +15,9 @@ import { describeTree } from "./printer/describe-tree";
 import { getModuleId, ModuleAny, registerModule } from "./modules";
 
 export interface CreateAppOptions {
-  serverOptions?: FastifyServerOptions;
+  fastifyInstance?: FastifyInstance;
   root: ModuleAny;
+  serverOptions?: FastifyServerOptions;
 }
 
 declare module "fastify" {
@@ -28,10 +29,16 @@ declare module "fastify" {
 type InstancesMap = Map<string, string>;
 
 export async function createApp({
+  fastifyInstance,
   serverOptions,
   root,
 }: CreateAppOptions): Promise<FastifyInstance> {
-  const fastify = Fastify(serverOptions);
+  if (fastifyInstance && serverOptions) {
+    throw new Error(
+      "Either provide fastifyInstance or serverOptions, not both.",
+    );
+  }
+  const fastify = fastifyInstance ?? Fastify(serverOptions);
 
   const moduleNameToId: InstancesMap = new Map();
   const providerNameToId: InstancesMap = new Map();
@@ -58,8 +65,8 @@ export async function createApp({
 
   const ctx = {
     name: root.name,
-    bindings: root.bindings
-  }
+    bindings: root.bindings,
+  };
   fastify.addHook("onReady", async () => {
     for (const prov of allProviders) {
       if (!prov.onReady) {
