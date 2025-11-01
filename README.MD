@@ -180,7 +180,7 @@ const profiles = await testProvider.resolve();
 
 ### Global Provider Overrides
 
-Stratify supports **global provider overrides** when bootstrapping the app.
+Stratify supports global provider overrides when bootstrapping the app.
 
 This is useful for integration and e2e tests where you need to
 replace real dependencies with fakes without reconstructing your application tree.
@@ -211,7 +211,7 @@ const paymentModule = createModule({
 });
 ```
 
-Then create the app with overriders:
+Then create the app with overrides:
 
 ```ts
 const fakePayment = createProvider({
@@ -221,7 +221,7 @@ const fakePayment = createProvider({
 
 const app = await createApp({
   root: paymentModule,
-  overriders: [fakePayment],
+  overrides: [fakePayment],
 });
 
 const res = await app.inject({ method: "GET", url: "/pay" });

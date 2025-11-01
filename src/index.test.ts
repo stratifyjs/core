@@ -39,7 +39,7 @@ describe("createApp", () => {
     await fastifyInstance.close();
   });
 
-  describe("overriders", () => {
+  describe("overrides", () => {
     test("should override a simple provider by name", async (t: TestContext) => {
       const realPayment = createProvider({
         name: "payment",
@@ -70,7 +70,7 @@ describe("createApp", () => {
 
       const app = await createApp({
         root,
-        overriders: [fakePayment],
+        overrides: [fakePayment],
       });
 
       const res = await app.inject({ method: "GET", url: "/pay" });
@@ -122,7 +122,7 @@ describe("createApp", () => {
 
       const app = await createApp({
         root,
-        overriders: [fakeUsers],
+        overrides: [fakeUsers],
       });
 
       const res = await app.inject({ method: "GET", url: "/profiles" });
@@ -194,7 +194,7 @@ describe("createApp", () => {
 
       const app = await createApp({
         root,
-        overriders: [fakeMailer],
+        overrides: [fakeMailer],
       });
 
       const res = await app.inject({
@@ -253,7 +253,7 @@ describe("createApp", () => {
 
       const app = await createApp({
         root,
-        overriders: [fakeProv],
+        overrides: [fakeProv],
       });
 
       t.assert.strictEqual(realCount, 0);

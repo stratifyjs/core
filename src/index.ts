@@ -18,7 +18,7 @@ export interface CreateAppOptions {
   root: ModuleAny;
   fastifyInstance?: FastifyInstance;
   serverOptions?: FastifyServerOptions;
-  overriders?: ProviderAny[];
+  overrides?: ProviderAny[];
 }
 
 declare module "fastify" {
@@ -33,7 +33,7 @@ export async function createApp({
   fastifyInstance,
   serverOptions,
   root,
-  overriders = [],
+  overrides = [],
 }: CreateAppOptions): Promise<FastifyInstance> {
   if (fastifyInstance && serverOptions) {
     throw new Error(
@@ -62,7 +62,7 @@ export async function createApp({
   });
 
   const overrideMap = new Map<string, ProviderAny>();
-  for (const p of overriders) {
+  for (const p of overrides) {
     overrideMap.set(p.name, p);
   }
 
