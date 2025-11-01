@@ -15,9 +15,10 @@ import { describeTree } from "./printer/describe-tree";
 import { getModuleId, ModuleAny, registerModule } from "./modules";
 
 export interface CreateAppOptions {
-  fastifyInstance?: FastifyInstance;
   root: ModuleAny;
+  fastifyInstance?: FastifyInstance;
   serverOptions?: FastifyServerOptions;
+  overriders?: ProviderAny[];
 }
 
 declare module "fastify" {
@@ -32,6 +33,7 @@ export async function createApp({
   fastifyInstance,
   serverOptions,
   root,
+  overriders = [],
 }: CreateAppOptions): Promise<FastifyInstance> {
   if (fastifyInstance && serverOptions) {
     throw new Error(
@@ -59,7 +61,12 @@ export async function createApp({
     }
   });
 
-  const container = new Container();
+  const overrideMap = new Map<string, ProviderAny>();
+  for (const p of overriders) {
+    overrideMap.set(p.name, p);
+  }
+
+  const container = new Container(overrideMap);
 
   await registerModule(fastify, root, container);
 
