@@ -450,88 +450,88 @@ describe("contract bindings", () => {
     t.assert.ok(bound);
   });
 
-    test("contracts work as nested provider dependencies", async (t: TestContext) => {
-      t.plan(1);
+  test("contracts work as nested provider dependencies", async (t: TestContext) => {
+    t.plan(1);
 
-      let sent = "";
-      const MAILER_TOKEN = "mailer";
-      const Mailer = contract<{ send: (to: string, body: string) => void }>(
-        MAILER_TOKEN,
-      );
+    let sent = "";
+    const MAILER_TOKEN = "mailer";
+    const Mailer = contract<{ send: (to: string, body: string) => void }>(
+      MAILER_TOKEN,
+    );
 
-      const smtpMailer = createProvider({
-        name: MAILER_TOKEN,
-        expose: () => ({
-          send: (to: string, body: string) => {
-            sent = `${to}:${body}`;
-          },
-        }),
-      });
-
-      const notificationService = createProvider({
-        name: "notification-service",
-        deps: { mailer: Mailer },
-        expose: ({ mailer }) => ({
-          notify: (email: string) => mailer.send(email, "Notification"),
-        }),
-      });
-
-      const userService = createProvider({
-        name: "user-service",
-        deps: { notification: notificationService },
-        expose: ({ notification }) => ({
-          welcome: (email: string) => notification.notify(email),
-        }),
-      });
-
-      const installer = createInstaller({
-        deps: { userService },
-        install: async ({ deps }) =>
-          deps.userService.welcome("nested@example.com"),
-      });
-
-      const root = createModule({
-        name: "root",
-        installers: [installer],
-        bindings: [smtpMailer],
-      });
-
-      const app = await createApp({ root });
-      await app.close();
-
-      t.assert.strictEqual(sent, "nested@example.com:Notification");
+    const smtpMailer = createProvider({
+      name: MAILER_TOKEN,
+      expose: () => ({
+        send: (to: string, body: string) => {
+          sent = `${to}:${body}`;
+        },
+      }),
     });
 
-    test("contracts work in installer direct dependencies", async (t: TestContext) => {
-      t.plan(1);
-
-      let tracked = "";
-      const TRACKER_TOKEN = "tracker";
-      const Tracker = contract<{ track: (msg: string) => void }>(TRACKER_TOKEN);
-
-      const fakeTracker = createProvider({
-        name: TRACKER_TOKEN,
-        expose: () => ({
-          track: (msg: string) => {
-            tracked = msg;
-          },
-        }),
-      });
-
-      const installer = createInstaller({
-        deps: { tracker: Tracker },
-        install: async ({ deps }) => deps.tracker.track("installer-contract-ok"),
-      });
-
-      const root = createModule({
-        name: "root",
-        installers: [installer],
-        bindings: [fakeTracker],
-      });
-
-      const app = await createApp({ root });
-      await app.close();
-
-      t.assert.strictEqual(tracked, "installer-contract-ok");
+    const notificationService = createProvider({
+      name: "notification-service",
+      deps: { mailer: Mailer },
+      expose: ({ mailer }) => ({
+        notify: (email: string) => mailer.send(email, "Notification"),
+      }),
     });
+
+    const userService = createProvider({
+      name: "user-service",
+      deps: { notification: notificationService },
+      expose: ({ notification }) => ({
+        welcome: (email: string) => notification.notify(email),
+      }),
+    });
+
+    const installer = createInstaller({
+      deps: { userService },
+      install: async ({ deps }) =>
+        deps.userService.welcome("nested@example.com"),
+    });
+
+    const root = createModule({
+      name: "root",
+      installers: [installer],
+      bindings: [smtpMailer],
+    });
+
+    const app = await createApp({ root });
+    await app.close();
+
+    t.assert.strictEqual(sent, "nested@example.com:Notification");
+  });
+
+  test("contracts work in installer direct dependencies", async (t: TestContext) => {
+    t.plan(1);
+
+    let tracked = "";
+    const TRACKER_TOKEN = "tracker";
+    const Tracker = contract<{ track: (msg: string) => void }>(TRACKER_TOKEN);
+
+    const fakeTracker = createProvider({
+      name: TRACKER_TOKEN,
+      expose: () => ({
+        track: (msg: string) => {
+          tracked = msg;
+        },
+      }),
+    });
+
+    const installer = createInstaller({
+      deps: { tracker: Tracker },
+      install: async ({ deps }) => deps.tracker.track("installer-contract-ok"),
+    });
+
+    const root = createModule({
+      name: "root",
+      installers: [installer],
+      bindings: [fakeTracker],
+    });
+
+    const app = await createApp({ root });
+    await app.close();
+
+    t.assert.strictEqual(tracked, "installer-contract-ok");
+  });
 });
