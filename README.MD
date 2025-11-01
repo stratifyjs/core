@@ -194,7 +194,6 @@ const realPayment = createProvider({
 });
 
 const paymentController = createController({
-  name: "payment",
   deps: { payment: realPayment },
   build: ({ builder, deps }) => {
     builder.addRoute({
