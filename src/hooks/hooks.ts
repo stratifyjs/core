@@ -46,7 +46,11 @@ export function createHooks<
       ctx: ModuleContext,
       cache: AdapterCache,
     ) {
-      const providerMap = await resolveProviderMap(container, deps as never, ctx);
+      const providerMap = await resolveProviderMap(
+        container,
+        deps as never,
+        ctx,
+      );
       const adapsMap = await resolveAdapterMap(fastify, adaps as never, cache);
       const hookBuilder =
         type === "http"

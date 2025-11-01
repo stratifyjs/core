@@ -51,8 +51,8 @@ export async function registerModule(
   const plugin = async (instance: FastifyInstance) => {
     const ctx = {
       name: mod.name,
-      bindings: mod.bindings
-    }
+      bindings: mod.bindings,
+    };
     const adapterCache: AdapterCache = new WeakMap();
     if (Array.isArray(mod.hooks)) {
       for (const hookConfig of mod.hooks) {
@@ -88,7 +88,7 @@ export async function registerModule(
 export async function resolveProviderMap(
   container: Container,
   map: ProvidersMap,
-  ctx: ModuleContext
+  ctx: ModuleContext,
 ) {
   const out: Record<string, unknown> = {};
   for (const [k, p] of Object.entries(map)) {
