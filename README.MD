@@ -228,7 +228,6 @@ const res = await app.inject({ method: "GET", url: "/pay" });
 assert.strictEqual(res.body, "fake");
 ```
 
-
 ## 4) Controllers (Routes)
 
 Controllers declare routes via a builder.
@@ -264,7 +263,7 @@ const userController = createController({
     });
   },
 });
-````
+```
 
 Attach to a module:
 
