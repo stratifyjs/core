@@ -178,6 +178,57 @@ const testProvider = profilesProvider.withProviders((deps) => ({
 const profiles = await testProvider.resolve();
 ```
 
+### Global Provider Overrides
+
+Stratify supports **global provider overrides** when bootstrapping the app.
+
+This is useful for integration and e2e tests where you need to
+replace real dependencies with fakes without reconstructing your application tree.
+
+Example of module:
+
+```ts
+const realPayment = createProvider({
+  name: "payment",
+  expose: () => ({ charge: () => "real" }),
+});
+
+const paymentController = createController({
+  name: "payment",
+  deps: { payment: realPayment },
+  build: ({ builder, deps }) => {
+    builder.addRoute({
+      method: "GET",
+      url: "/pay",
+      handler: async () => deps.payment.charge(),
+    });
+  },
+});
+
+const paymentModule = createModule({
+  name: "payment-module",
+  controllers: [paymentController],
+});
+```
+
+Then create the app with overriders:
+
+```ts
+const fakePayment = createProvider({
+  name: "payment",
+  expose: () => ({ charge: () => "fake" }),
+});
+
+const app = await createApp({
+  root: paymentModule,
+  overriders: [fakePayment],
+});
+
+const res = await app.inject({ method: "GET", url: "/pay" });
+assert.strictEqual(res.body, "fake");
+```
+
+
 ## 4) Controllers (Routes)
 
 Controllers declare routes via a builder.
@@ -213,7 +264,7 @@ const userController = createController({
     });
   },
 });
-```
+````
 
 Attach to a module:
 

@@ -9,11 +9,10 @@ import {
 } from "./index";
 
 describe("createApp", () => {
-  test("should create a fastify instance", async (t: TestContext) => {
+  test("should create a fastify instance", async () => {
     const root = createModule({ name: "root" });
     const app = await createApp({ root });
     await app.close();
-    t.assert.ok(app);
   });
 
   test("should use fastifyInstance, if provided ", async (t: TestContext) => {

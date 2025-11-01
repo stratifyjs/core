@@ -58,12 +58,12 @@ export class Container {
           `Contract provider "${prov.name}" has no binding in module "${ctx.name}".`,
         );
       }
-      provider = bound as typeof provider;
+      provider = bound;
     }
 
     const override = this.overrides.get(provider.name);
     if (override) {
-      provider = override as typeof provider;
+      provider = override;
     }
 
     return provider;
