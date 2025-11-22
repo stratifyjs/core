@@ -1,14 +1,16 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyFn = (...args: any[]) => unknown;
 
+const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
+
 export function ensureAsyncCallback(name: string, fn: AnyFn): void {
-  if (fn.constructor.name !== "AsyncFunction") {
-    throw new TypeError(
-      `Expected an async function for "${name}". ` +
-        `Stratify enforces the use of async functions for hooks and route handlers ` +
-        `to avoid mixing promise and callback paradigms, which can cause unexpected behavior.`,
-    );
-  }
+  if (fn instanceof AsyncFunction) return;
+
+  throw new TypeError(
+    `Expected an async function for "${name}". ` +
+      `Stratify enforces the use of async functions for hooks and route handlers ` +
+      `to avoid mixing promise and callback paradigms, which can cause unexpected behavior.`,
+  );
 }
 
 export function ensureAsyncCallbacks(

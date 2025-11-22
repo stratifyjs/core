@@ -47,7 +47,7 @@ describe("adapters integration", () => {
     const json = res.json();
     t.assert.deepStrictEqual(json, {
       ok: true,
-      msg: "5.6.1",
+      msg: "5.6.2",
     });
 
     await app.close();
