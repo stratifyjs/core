@@ -4,6 +4,7 @@ import { deepClone } from "../utils/deep-clone";
 import {
   BaseProviderDepsMap,
   ProviderAny,
+  ProviderContract,
   ProviderDef,
   ProviderOptions,
   ProvidersMap,
@@ -28,7 +29,7 @@ export function contract<Value>(name: string) {
 
   provider.isContract = true;
 
-  return provider;
+  return provider as ProviderContract<Value>;
 }
 
 export function createProvider<
