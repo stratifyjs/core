@@ -5,7 +5,5 @@ dist
 local
 coverage
 
-package-lock.json
-
 # To work locally
 .local
