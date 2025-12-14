@@ -65,8 +65,7 @@ createProvider({
   name: "user",
   deps: { greeter: PrefixGreeter },
   expose({ greeter }) {
-    expectType<Greeter>(greeter);   
+    expectType<Greeter>(greeter);
     return greeter.greet("Alice");
   },
 });
-
