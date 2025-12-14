@@ -28,3 +28,5 @@ export function createInstaller<Providers extends ProvidersMap>(
     },
   };
 }
+
+export const installer = createInstaller;

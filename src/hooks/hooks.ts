@@ -72,3 +72,5 @@ export function createHooks<
     },
   };
 }
+
+export const hooks = createHooks;

@@ -68,6 +68,8 @@ export function createProvider<
   return self;
 }
 
+export const provider = createProvider;
+
 export async function resolveDeps(
   container: Container,
   prov: ProviderAny,

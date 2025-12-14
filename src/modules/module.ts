@@ -97,3 +97,5 @@ export async function resolveProviderMap(
 
   return out;
 }
+
+export const mod = createModule;

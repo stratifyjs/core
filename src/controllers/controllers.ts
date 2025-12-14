@@ -46,3 +46,5 @@ export function createController<
     },
   };
 }
+
+export const controller = createController;
