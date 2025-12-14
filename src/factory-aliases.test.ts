@@ -29,7 +29,10 @@ describe("factory aliases", () => {
       adaps: { version: versionAdapter },
       build: async ({ builder, deps, adaps }) => {
         builder.addHook("onRequest", async (_req, reply) => {
-          reply.header("x-alias-hooks", `${deps.users.find()}@${adaps.version}`);
+          reply.header(
+            "x-alias-hooks",
+            `${deps.users.find()}@${adaps.version}`,
+          );
         });
       },
     });
