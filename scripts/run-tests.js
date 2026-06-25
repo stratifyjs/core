@@ -9,7 +9,7 @@ if (files.length === 0) {
 }
 /* c8 ignore stop */
 
-const proc = spawn("node", ["--import", "tsx", "--test", ...files], {
+const proc = spawn("node", ["--import", "tsx/esm", "--test", ...files], {
   stdio: "inherit",
 });
 
