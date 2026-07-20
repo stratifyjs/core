@@ -15,6 +15,118 @@ describe("createApp", () => {
     await app.close();
   });
 
+  test("should expose the application container on the Fastify instance", async (t: TestContext) => {
+    const users = { find: () => ["Alice"] };
+    const usersProvider = createProvider({
+      name: "users",
+      expose: () => users,
+    });
+    const usersController = createController({
+      name: "users-controller",
+      deps: { users: usersProvider },
+      build: () => {},
+    });
+    const root = createModule({
+      name: "root",
+      controllers: [usersController],
+    });
+
+    const app = await createApp({ root });
+
+    t.assert.ok(app.hasDecorator("ioc"));
+    t.assert.strictEqual(await app.ioc.get(usersProvider), users);
+    t.assert.strictEqual(await app.ioc.get("users"), users);
+
+    await app.close();
+  });
+
+  test("should reject providers that are not registered in the application", async (t: TestContext) => {
+    let exposeCalled = false;
+    const usersProvider = createProvider({
+      name: "users",
+      expose: () => {
+        exposeCalled = true;
+        return { find: () => ["Alice"] };
+      },
+    });
+    const root = createModule({ name: "root" });
+
+    const app = await createApp({ root });
+
+    await t.assert.rejects(() => app.ioc.get(usersProvider), {
+      message: 'Provider "users" is not registered in the application.',
+    });
+    await t.assert.rejects(() => app.ioc.get("missing-users"), {
+      message: 'Provider "missing-users" is not registered in the application.',
+    });
+    t.assert.strictEqual(exposeCalled, false);
+
+    await app.close();
+  });
+
+  test("should resolve providers from ioc with application overrides", async (t: TestContext) => {
+    const usersProvider = createProvider({
+      name: "users",
+      expose: () => ({ find: () => ["real-user"] }),
+    });
+    const fakeUsersProvider = createProvider({
+      name: "users",
+      expose: () => ({ find: () => ["fake-user"] }),
+    });
+    const usersController = createController({
+      name: "users-controller",
+      deps: { users: usersProvider },
+      build: () => {},
+    });
+    const root = createModule({
+      name: "root",
+      controllers: [usersController],
+    });
+
+    const app = await createApp({
+      root,
+      overrides: [fakeUsersProvider],
+    });
+
+    const users = await app.ioc.get(usersProvider);
+    t.assert.deepStrictEqual(users.find(), ["fake-user"]);
+
+    await app.close();
+  });
+
+  test("should get providers used by nested modules from ioc", async (t: TestContext) => {
+    const usersProvider = createProvider({
+      name: "users",
+      expose: () => ({ find: () => ["nested-user"] }),
+    });
+    let nestedUsers:
+      Awaited<ReturnType<typeof usersProvider.expose>> | undefined;
+
+    const usersController = createController({
+      name: "users-controller",
+      deps: { users: usersProvider },
+      build: ({ deps }) => {
+        nestedUsers = deps.users;
+      },
+    });
+    const usersModule = createModule({
+      name: "users-module",
+      controllers: [usersController],
+    });
+    const root = createModule({
+      name: "root",
+      subModules: [usersModule],
+    });
+
+    const app = await createApp({ root });
+
+    const users = await app.ioc.get(usersProvider);
+    t.assert.strictEqual(users, nestedUsers);
+    t.assert.deepStrictEqual(users.find(), ["nested-user"]);
+
+    await app.close();
+  });
+
   test("should use fastifyInstance, if provided ", async (t: TestContext) => {
     const fastifyInstance = Fastify();
 

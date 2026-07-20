@@ -10,11 +10,15 @@ export * from "./controllers";
 export * from "./fastify";
 
 import { getProviderId, resolveDeps } from "./providers/providers";
-import type { ProviderAny } from "./providers/providers.types";
+import type {
+  BaseProviderDepsMap,
+  ProviderAny,
+  ProviderDef,
+} from "./providers/providers.types";
 import { Container } from "./container/container";
 import { describeTree } from "./printer/describe-tree";
 import { getModuleId, registerModule } from "./modules/module";
-import type { ModuleAny } from "./modules/module.types";
+import type { ModuleAny, ModuleContext } from "./modules/module.types";
 
 export interface CreateAppOptions {
   root: ModuleAny;
@@ -23,13 +27,53 @@ export interface CreateAppOptions {
   overrides?: ProviderAny[];
 }
 
+export interface IocContainer {
+  get<ProviderDepsMap extends BaseProviderDepsMap, Value>(
+    provider: ProviderDef<ProviderDepsMap, Value>,
+  ): Promise<Value>;
+  get<Value = unknown>(providerName: string): Promise<Value>;
+}
+
 declare module "fastify" {
   export interface FastifyInstance {
     describeTree: () => string;
+    ioc: IocContainer;
   }
 }
 
 type InstancesMap = Map<string, string>;
+
+class ApplicationIocContainer implements IocContainer {
+  constructor(
+    private readonly container: Container,
+    private readonly providersByName: Map<string, ProviderAny>,
+    private readonly providerContexts: Map<ProviderAny, ModuleContext>,
+  ) {}
+
+  get<ProviderDepsMap extends BaseProviderDepsMap, Value>(
+    provider: ProviderDef<ProviderDepsMap, Value>,
+  ): Promise<Value>;
+  get<Value = unknown>(providerName: string): Promise<Value>;
+  async get(providerOrName: ProviderAny | string): Promise<unknown> {
+    const provider =
+      typeof providerOrName === "string"
+        ? this.providersByName.get(providerOrName)
+        : providerOrName;
+    const providerName =
+      typeof providerOrName === "string" ? providerOrName : providerOrName.name;
+    const providerContext = provider
+      ? this.providerContexts.get(provider)
+      : undefined;
+
+    if (!provider || !providerContext) {
+      throw new Error(
+        `Provider "${providerName}" is not registered in the application.`,
+      );
+    }
+
+    return this.container.get(provider, providerContext);
+  }
+}
 
 export async function createApp({
   fastifyInstance,
@@ -48,20 +92,46 @@ export async function createApp({
   const providerNameToId: InstancesMap = new Map();
 
   const allProviders = new Set<ProviderAny>();
+  const providerContexts = new Map<ProviderAny, ModuleContext>();
   walkModules(root, (m) => {
     ensureModuleNameUnicity(moduleNameToId, m);
+    const moduleContext = {
+      name: m.name,
+      bindings: m.bindings,
+    };
     for (const hook of m.hooks) {
-      collectProvidersFromConfig(hook, allProviders, providerNameToId);
+      collectProvidersFromConfig(
+        hook,
+        allProviders,
+        providerNameToId,
+        providerContexts,
+        moduleContext,
+      );
     }
 
     for (const controller of m.controllers) {
-      collectProvidersFromConfig(controller, allProviders, providerNameToId);
+      collectProvidersFromConfig(
+        controller,
+        allProviders,
+        providerNameToId,
+        providerContexts,
+        moduleContext,
+      );
     }
 
     for (const installer of m.installers) {
-      collectProvidersFromConfig(installer, allProviders, providerNameToId);
+      collectProvidersFromConfig(
+        installer,
+        allProviders,
+        providerNameToId,
+        providerContexts,
+        moduleContext,
+      );
     }
   });
+  const providersByName = new Map(
+    [...allProviders].map((provider) => [provider.name, provider]),
+  );
 
   const overrideMap = new Map<string, ProviderAny>();
   for (const p of overrides) {
@@ -69,13 +139,18 @@ export async function createApp({
   }
 
   const container = new Container(overrideMap);
-
-  await registerModule(fastify, root, container);
-
   const ctx = {
     name: root.name,
     bindings: root.bindings,
   };
+
+  fastify.decorate(
+    "ioc",
+    new ApplicationIocContainer(container, providersByName, providerContexts),
+  );
+
+  await registerModule(fastify, root, container);
+
   fastify.addHook("onReady", async () => {
     for (const prov of allProviders) {
       if (!prov.onReady) {
@@ -127,12 +202,17 @@ function collectProvidersFromConfig(
   },
   allProviders: Set<ProviderAny>,
   providerNameToId: InstancesMap,
+  providerContexts: Map<ProviderAny, ModuleContext>,
+  moduleContext: ModuleContext,
 ): void {
   const deps = config.deps;
   for (const p of Object.values(deps)) {
     walkProviders(p as ProviderAny, (pp) => {
       ensureProviderNameUnicity(providerNameToId, pp);
       allProviders.add(pp);
+      if (!providerContexts.has(pp)) {
+        providerContexts.set(pp, moduleContext);
+      }
     });
   }
 }
