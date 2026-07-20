@@ -9,10 +9,12 @@ export * from "./hooks";
 export * from "./controllers";
 export * from "./fastify";
 
-import { getProviderId, resolveDeps, type ProviderAny } from "./providers";
+import { getProviderId, resolveDeps } from "./providers/providers";
+import type { ProviderAny } from "./providers/providers.types";
 import { Container } from "./container/container";
 import { describeTree } from "./printer/describe-tree";
-import { getModuleId, ModuleAny, registerModule } from "./modules";
+import { getModuleId, registerModule } from "./modules/module";
+import type { ModuleAny } from "./modules/module.types";
 
 export interface CreateAppOptions {
   root: ModuleAny;

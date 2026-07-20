@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import type { ProvidersMap, ExposeDeps } from "../../src/providers";
 import type { Container } from "../../src/container/container";
-import { ModuleContext } from "../modules";
+import type { ModuleContext } from "../modules/module.types";
 
 /**
  * Installer builder callback.

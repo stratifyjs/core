@@ -7,13 +7,16 @@ import {
   RequestPayload,
   RouteOptions,
 } from "fastify";
-import { ApplicationHook, LifecycleHook } from "fastify/types/hooks";
 import { HttpHooksBuilder } from "./http-hooks-builder";
 import { ExposeDeps, ProvidersMap } from "../providers";
 import { Container } from "../container/container";
 import { AppHooksBuilder } from "./application-hooks-builder";
-import { AdapterCache, AdapterMap, AdapterValues } from "../fastify";
-import { ModuleContext } from "../modules";
+import type {
+  AdapterCache,
+  AdapterMap,
+  AdapterValues,
+} from "../fastify/adapters.types";
+import type { ModuleContext } from "../modules/module.types";
 
 // --- HTTP  hooks ---
 export type OnRequestHandler = (
@@ -60,8 +63,6 @@ export type OnRequestAbortHandler = (
   request: FastifyRequest,
 ) => Promise<unknown>;
 
-export type HttpHookName = LifecycleHook;
-
 export type HttpHookMap = {
   onRequest: OnRequestHandler[];
   preParsing: OnPreParsingHandler[];
@@ -74,6 +75,8 @@ export type HttpHookMap = {
   onError: OnErrorHookHandler[];
   onRequestAbort: OnRequestAbortHandler[];
 };
+
+export type HttpHookName = keyof HttpHookMap;
 
 export type HttpHookHandlers<K extends keyof HttpHookMap> = HttpHookMap[K];
 export type HttpHookHandler<K extends keyof HttpHookMap> =
@@ -133,8 +136,6 @@ export type OnRegisterHandler = (
   opts: RegisterOptions & FastifyPluginOptions,
 ) => void;
 
-export type AppHookName = ApplicationHook;
-
 export type AppHookMap = {
   onReady: OnReadyHandler[];
   onClose: OnCloseHandler[];
@@ -143,6 +144,8 @@ export type AppHookMap = {
   onRegister: OnRegisterHandler[];
   preClose: OnPreCloseHandler[];
 };
+
+export type AppHookName = keyof AppHookMap;
 
 type ApplicationHooksBuilderCallback<
   Providers extends ProvidersMap,

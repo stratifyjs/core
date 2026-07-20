@@ -1,4 +1,29 @@
-export * from "./hooks.types";
-export * from "./hooks";
-export * from "./http-hooks-builder";
-export * from "./application-hooks-builder";
+export { createHooks, createHooks as hooks } from "./hooks";
+export type {
+  AppHookMap,
+  AppHookName,
+  AppHooksConfig,
+  AppHooksOptions,
+  HttpHookHandler,
+  HttpHookHandlers,
+  HttpHookMap,
+  HttpHookName,
+  HttpHooksConfig,
+  HttpHooksOptions,
+  OnCloseHandler,
+  OnErrorHookHandler,
+  OnListenHandler,
+  OnPreCloseHandler,
+  OnPreHandlerHandler,
+  OnPreParsingHandler,
+  OnPreSerializationHandler,
+  OnPreValidationHandler,
+  OnReadyHandler,
+  OnRegisterHandler,
+  OnRequestAbortHandler,
+  OnRequestHandler,
+  OnResponseHandler,
+  OnRouteHandler,
+  OnSendHookHandler,
+  OnTimeoutHandler,
+} from "./hooks.types";

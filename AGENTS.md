@@ -32,6 +32,11 @@ Keep implementation, runtime tests, and type tests close together in `src/`.
 When adding a public symbol, export it through the nearest barrel file and make
 sure it is reachable from `src/index.ts`.
 
+The folder barrel files intentionally enumerate the public API. Do not replace
+their named exports with `export *`: registration, resolution, identity, cache,
+and builder implementations must remain internal. Internal code should import
+those symbols from their defining files rather than from a public barrel.
+
 ## Runtime model and invariants
 
 - A module registers, in order: hooks, installers, controllers, then child

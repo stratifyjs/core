@@ -1,6 +1,8 @@
-import { AdapterAny } from "../fastify";
-import { getModuleId, type ModuleAny } from "../modules";
-import { getProviderId, type ProviderAny } from "../providers";
+import type { AdapterAny } from "../fastify/adapters.types";
+import { getModuleId } from "../modules/module";
+import type { ModuleAny } from "../modules/module.types";
+import { getProviderId } from "../providers/providers";
+import type { ProviderAny } from "../providers/providers.types";
 
 const useColor = process.stdout.isTTY;
 const wrap = (code: number, s: string, enabled: boolean) => {

@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { ProvidersMap } from "../providers";
+import type { ProvidersMap } from "../providers/providers.types";
 import {
   AppHooksConfig,
   AppHooksOptions,
@@ -9,8 +9,10 @@ import {
 import { Container } from "../container/container";
 import { HttpHooksBuilder } from "./http-hooks-builder";
 import { AppHooksBuilder } from "./application-hooks-builder";
-import { ModuleContext, resolveProviderMap } from "../modules";
-import { AdapterCache, AdapterMap, resolveAdapterMap } from "../fastify";
+import { resolveProviderMap } from "../modules/module";
+import type { ModuleContext } from "../modules/module.types";
+import { resolveAdapterMap } from "../fastify/adapters";
+import type { AdapterCache, AdapterMap } from "../fastify/adapters.types";
 
 export function createHooks<
   Providers extends ProvidersMap,
@@ -71,5 +73,3 @@ export function createHooks<
     },
   };
 }
-
-export const hooks = createHooks;

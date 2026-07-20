@@ -8,8 +8,8 @@ import {
   ModuleOptions,
   SubModulesMap,
 } from "./module.types";
-import { ProvidersMap } from "../providers";
-import { AdapterCache } from "../fastify";
+import type { AdapterCache } from "../fastify/adapters.types";
+import type { ProvidersMap } from "../providers/providers.types";
 
 const kModuleId = Symbol("fastify-dependency-injection:moduleId");
 let __seq = 0;
@@ -97,5 +97,3 @@ export async function resolveProviderMap(
 
   return out;
 }
-
-export const mod = createModule;

@@ -1,3 +1,7 @@
-export * from "./module";
-export * from "./module.types";
-export * from "../controllers/controllers.types";
+export { createModule, createModule as mod } from "./module";
+export type {
+  ModuleAny,
+  ModuleDef,
+  ModuleOptions,
+  SubModulesMap,
+} from "./module.types";
