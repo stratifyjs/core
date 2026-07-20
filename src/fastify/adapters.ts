@@ -7,6 +7,7 @@ import {
   AdapterValues,
 } from "./adapters.types";
 import type { FastifyInstance } from "fastify";
+import { restrictFastifyForAdapter } from "./adapter-fastify-instance";
 
 export function createAdapter<Value>(
   def: AdapterOptions<Value>,
@@ -24,11 +25,13 @@ export async function resolveAdapterMap<AMap extends AdapterMap>(
   adapters: AMap,
   cache: AdapterCache,
 ): Promise<AdapterValues<AMap>> {
+  const adapterFastify = restrictFastifyForAdapter(fastify);
+
   const resolveOne = async (adapter: AdapterAny): Promise<unknown> => {
     if (cache.has(adapter)) return cache.get(adapter);
 
     const value = await adapter.expose({
-      fastify,
+      fastify: adapterFastify,
     });
 
     cache.set(adapter, value);

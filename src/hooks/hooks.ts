@@ -29,8 +29,7 @@ export function createHooks<
   Adaps extends AdapterMap,
 >(
   options:
-    | HttpHooksOptions<Providers, Adaps>
-    | AppHooksOptions<Providers, Adaps>,
+    HttpHooksOptions<Providers, Adaps> | AppHooksOptions<Providers, Adaps>,
 ) {
   const { type, deps = {}, name = "unknown", adaps = {}, build } = options;
 
