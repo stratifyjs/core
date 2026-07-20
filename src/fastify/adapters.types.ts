@@ -1,4 +1,6 @@
-import type { FastifyInstance } from "fastify";
+import type { AdapterFastifyInstance } from "./adapter-fastify-instance";
+
+export type { AdapterFastifyInstance } from "./adapter-fastify-instance";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AdapterAny = AdapterDef<any>;
@@ -9,12 +11,12 @@ export type AdapterValues<M extends AdapterMap> = {
 
 export interface AdapterOptions<Value = unknown> {
   name?: string;
-  expose: (ctx: { fastify: FastifyInstance }) => Value | Promise<Value>;
+  expose: (ctx: { fastify: AdapterFastifyInstance }) => Value | Promise<Value>;
 }
 
 export interface AdapterDef<Value = unknown> {
   name: string;
-  expose: (ctx: { fastify: FastifyInstance }) => Value | Promise<Value>;
+  expose: (ctx: { fastify: AdapterFastifyInstance }) => Value | Promise<Value>;
   _adapter?: never;
 }
 
