@@ -1,3 +1,12 @@
-export * from "./routes-builder";
-export * from "./controllers";
-export * from "./controllers.types";
+export {
+  createController,
+  createController as controller,
+} from "./controllers";
+export type {
+  BaseStratifyRouteOptions,
+  ControllerBuilderCallback,
+  ControllerConfig,
+  ControllerOptions,
+  ExtractRouteGenerics,
+  StratifyRouteOptions,
+} from "./controllers.types";

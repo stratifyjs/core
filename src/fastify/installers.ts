@@ -1,7 +1,8 @@
 import type { FastifyInstance } from "fastify";
-import type { ProvidersMap } from "../../src/providers";
+import type { ProvidersMap } from "../providers/providers.types";
 import type { Container } from "../../src/container/container";
-import { resolveProviderMap, type ModuleContext } from "../../src/modules";
+import { resolveProviderMap } from "../modules/module";
+import type { ModuleContext } from "../modules/module.types";
 import type { InstallerOptions, InstallerConfig } from "./installers.types";
 
 export function createInstaller<Providers extends ProvidersMap>(
@@ -28,5 +29,3 @@ export function createInstaller<Providers extends ProvidersMap>(
     },
   };
 }
-
-export const installer = createInstaller;

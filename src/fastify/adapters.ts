@@ -45,5 +45,3 @@ export async function resolveAdapterMap<AMap extends AdapterMap>(
 
   return out as AdapterValues<AMap>;
 }
-
-export const adapter = createAdapter;

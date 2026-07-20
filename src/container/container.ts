@@ -1,10 +1,10 @@
-import { ModuleContext } from "../modules";
+import type { ModuleContext } from "../modules/module.types";
 import type {
   DepValues,
   ProviderAny,
   ProviderDef,
   BaseProviderDepsMap,
-} from "../providers";
+} from "../providers/providers.types";
 
 export class Container {
   private singletons = new WeakMap<object, Promise<unknown>>();

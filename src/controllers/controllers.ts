@@ -1,11 +1,9 @@
-import type { ProvidersMap } from "../providers";
+import type { ProvidersMap } from "../providers/providers.types";
 import { RoutesBuilder } from "./routes-builder";
-import {
-  ControllerConfig,
-  ControllerOptions,
-  resolveProviderMap,
-} from "../modules";
-import { AdapterMap, resolveAdapterMap } from "../fastify";
+import type { ControllerConfig, ControllerOptions } from "./controllers.types";
+import { resolveProviderMap } from "../modules/module";
+import { resolveAdapterMap } from "../fastify/adapters";
+import type { AdapterMap } from "../fastify/adapters.types";
 
 export function createController<
   Providers extends ProvidersMap,
@@ -46,5 +44,3 @@ export function createController<
     },
   };
 }
-
-export const controller = createController;

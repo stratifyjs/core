@@ -1,5 +1,5 @@
 import { Container } from "../container/container";
-import { ModuleContext } from "../modules";
+import type { ModuleContext } from "../modules/module.types";
 import { deepClone } from "../utils/deep-clone";
 import {
   BaseProviderDepsMap,
@@ -67,8 +67,6 @@ export function createProvider<
 
   return self;
 }
-
-export const provider = createProvider;
 
 export async function resolveDeps(
   container: Container,

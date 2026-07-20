@@ -51,11 +51,11 @@ const forbiddenAdapterFastifyProperties = [
   "addHttpMethod",
   "addConstraintStrategy",
   "supportedMethods",
-  Symbol.asyncDispose,
 ] as const;
 
 type ForbiddenAdapterFastifyProperty =
-  (typeof forbiddenAdapterFastifyProperties)[number];
+  | (typeof forbiddenAdapterFastifyProperties)[number]
+  | Extract<keyof FastifyInstance, symbol>;
 
 /**
  * Read-only Fastify view available to adapters.
@@ -68,9 +68,10 @@ export type AdapterFastifyInstance = Readonly<
   Omit<FastifyInstance, ForbiddenAdapterFastifyProperty>
 >;
 
-const forbiddenProperties = new Set<PropertyKey>(
-  forbiddenAdapterFastifyProperties,
-);
+const forbiddenProperties = new Set<PropertyKey>([
+  ...forbiddenAdapterFastifyProperties,
+  Symbol.asyncDispose,
+]);
 
 export function restrictFastifyForAdapter(
   fastify: FastifyInstance,

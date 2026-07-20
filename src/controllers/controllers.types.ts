@@ -20,8 +20,12 @@ import { Static, TSchema } from "@sinclair/typebox";
 import { ExposeDeps, ProvidersMap } from "../providers";
 import { RoutesBuilder } from "./routes-builder";
 import { Container } from "../container/container";
-import { AdapterCache, AdapterMap, AdapterValues } from "../fastify";
-import { ModuleContext } from "../modules";
+import type {
+  AdapterCache,
+  AdapterMap,
+  AdapterValues,
+} from "../fastify/adapters.types";
+import type { ModuleContext } from "../modules/module.types";
 
 type ErrorHandler = (
   error: unknown,
