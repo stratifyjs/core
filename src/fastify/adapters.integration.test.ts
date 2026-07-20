@@ -48,7 +48,7 @@ describe("adapters integration", () => {
     const json = res.json();
     t.assert.deepStrictEqual(json, {
       ok: true,
-      msg: "5.8.5",
+      msg: app.version,
     });
 
     await app.close();
@@ -144,6 +144,7 @@ describe("adapters integration", () => {
 
   test("adapters can read instance information and installed decorators", async (t: TestContext) => {
     const externalValue = { source: "external-plugin" };
+    let adapterVersion: string | undefined;
 
     const readExternalPlugin = createAdapter({
       expose: async ({ fastify }) => ({
@@ -164,7 +165,7 @@ describe("adapters integration", () => {
     const controller = createController({
       adaps: { readExternalPlugin },
       build: async ({ adaps }) => {
-        t.assert.strictEqual(adaps.readExternalPlugin.version, "5.8.5");
+        adapterVersion = adaps.readExternalPlugin.version;
         t.assert.strictEqual(adaps.readExternalPlugin.external, externalValue);
         t.assert.strictEqual(
           adaps.readExternalPlugin.stableMethodReference,
@@ -180,10 +181,12 @@ describe("adapters integration", () => {
     });
 
     const app = await createApp({ root });
+    t.assert.strictEqual(adapterVersion, app.version);
     await app.close();
   });
 
   test("adapters reject Fastify configuration and control APIs", async (t: TestContext) => {
+    let adapterVersion: string | undefined;
     const forbidden = [
       "server",
       "withTypeProvider",
@@ -291,7 +294,7 @@ describe("adapters integration", () => {
     const controller = createController({
       adaps: { forbiddenAccess },
       build: async ({ adaps }) => {
-        t.assert.strictEqual(adaps.forbiddenAccess, "5.8.5");
+        adapterVersion = adaps.forbiddenAccess;
       },
     });
 
@@ -301,6 +304,7 @@ describe("adapters integration", () => {
     });
 
     const app = await createApp({ root });
+    t.assert.strictEqual(adapterVersion, app.version);
     await app.close();
   });
 });

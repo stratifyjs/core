@@ -92,7 +92,7 @@ export function restrictFastifyForAdapter(
     return bound;
   };
 
-  const facade = Object.create(null)
+  const facade = Object.create(null);
   return new Proxy(facade, {
     get(_target, property) {
       return readProperty(property);

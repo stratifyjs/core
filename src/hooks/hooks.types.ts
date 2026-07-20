@@ -118,8 +118,7 @@ export interface HttpHooksConfig<
 // --- Application hooks ---
 
 export type OnReadyHandler =
-  | (() => Promise<void>)
-  | ((done: (err?: Error) => void) => void);
+  (() => Promise<void>) | ((done: (err?: Error) => void) => void);
 
 export type OnListenHandler = () => Promise<void>;
 
