@@ -7,6 +7,4 @@ The suffix _-ify_ acknowledges its Fastify heritage, and _strata_ expresses its 
 
 Stratify remains fully compatible with the Fastify ecosystem.
 
-> Early stage: open to community feedback as the API matures toward stability by late 2025.
-
 Read the documentation here: https://stratifyjs.github.io/
