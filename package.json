@@ -42,7 +42,7 @@
     "eslint": "^9.39.5",
     "eslint-plugin-import": "^2.32.0",
     "glob": "^13.0.6",
-    "prettier": "3.9.6",
+    "prettier": "3.9.9",
     "tsd": "^0.33.0",
     "tsup": "^8.5.1",
     "tsx": "^4.23.13",
