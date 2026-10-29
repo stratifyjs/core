@@ -1,6 +1,6 @@
 {
   "name": "@stratify/core",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "Dependency Injection package for the Fastify framework",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -37,22 +37,22 @@
   "license": "MIT",
   "devDependencies": {
     "@eslint/js": "^9.39.5",
-    "@types/node": "^26.4.1",
+    "@types/node": "^26.6.6",
     "c8": "^12.0.0",
     "eslint": "^9.39.5",
     "eslint-plugin-import": "^2.32.0",
-    "glob": "^13.0.6",
-    "prettier": "3.9.6",
+    "glob": "^14.0.3",
+    "prettier": "3.9.10",
     "tsd": "^0.33.0",
-    "tsup": "^8.5.1",
-    "tsx": "^4.23.13",
+    "tsup": "^9.0.0",
+    "tsx": "^4.23.15",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.69.0"
+    "typescript-eslint": "^8.72.1"
   },
   "dependencies": {
     "@sinclair/typebox": "^0.34.52",
-    "fastify": "^5.12.1",
-    "fastify-plugin": "^6.0.0"
+    "fastify": "^5.12.7",
+    "fastify-plugin": "^6.0.1"
   },
   "tsd": {
     "directory": "src"
