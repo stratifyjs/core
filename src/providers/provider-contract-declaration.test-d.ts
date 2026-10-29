@@ -47,6 +47,7 @@ interface Greeter {
 
 const GREETER_TOKEN = "greeter";
 const Greeter = contract<Greeter>(GREETER_TOKEN);
+expectType<ProviderContract<Greeter>>(Greeter);
 
 const PrefixProvider = createProvider({
   name: "prefix",
